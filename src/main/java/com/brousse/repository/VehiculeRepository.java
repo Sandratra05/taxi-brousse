@@ -17,4 +17,14 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
            "SELECT sv FROM StatutVehicule sv WHERE sv.id.idVehicule = v.id " +
            "AND sv.id.idVehiculesStatut = :statutId)")
     List<Vehicule> findByCurrentStatutId(@Param("statutId") Integer statutId);
+
+    @Query(value = """
+        SELECT v.id, v.immatriculation, v.modele, (b.montant_total * pv.nb_place) AS chiffreAffaire
+        FROM vehicule v
+        JOIN voyage vo ON v.id_vehicule = vo.id_vehicule
+        JOIN billet b ON vo.id_voyage = b.id_voyage
+        JOIN client c ON b.id_client = c.id_client
+        JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
+        """, nativeQuery = true)
+    List<Object[]> findVehiculeWithChiffreAffaireRaw();
 }
