@@ -44,6 +44,12 @@ public class VehiculeController {
         return "vehicules/list"; // templates/vehicules/list.html
     }
 
+    @GetMapping("/chiffreAffaire")
+    public String chiffreAffaireParVehicule(Model model) {
+        model.addAttribute("vehicules", vehiculeService.getChiffreAffaireParVehicule());
+        return "vehicules/affaire"; // templates/vehicules/affaire.html
+    }
+
     // Détail d'un véhicule
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
