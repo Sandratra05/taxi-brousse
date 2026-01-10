@@ -1,6 +1,7 @@
 package com.brousse.controller;
 
 import com.brousse.dto.VoyageFilterDTO;
+import com.brousse.dto.VoyageDTO;
 import com.brousse.model.VehiculesStatut;
 import com.brousse.model.Voyage;
 import com.brousse.model.Vehicule;
@@ -153,6 +154,53 @@ public class VoyageController {
         model.addAttribute("statuts", voyageStatutRepository.findAll());
 
         return "voyage/index";
+    }
+
+    // ----- CHIFFRE D'AFFAIRES -----
+    @GetMapping("/chiffreAffaire")
+    public String chiffreAffaire(Model model) {
+        List<VoyageDTO> results = voyageService.getVoyageChiffreAffaire();
+
+        // Préparer une liste d'éléments correspondant exactement aux colonnes du thead
+        List<Map<String, Object>> voyagesForView = new ArrayList<>();
+        for (VoyageDTO dto : results) {
+            Map<String, Object> item = new HashMap<>();
+
+            // Date de départ (LocalDateTime ou null)
+            item.put("dateDepart", dto.getDateDepart());
+
+            // Trajet sous forme "Départ → Arrivée"
+            String trajetStr = "-";
+            if (dto.getTrajet() != null && dto.getTrajet().getGareDepart() != null && dto.getTrajet().getGareArrivee() != null) {
+                trajetStr = dto.getTrajet().getGareDepart().getNom() + " → " + dto.getTrajet().getGareArrivee().getNom();
+            }
+            item.put("trajet", trajetStr);
+
+            // Chauffeur (nom + prénom si disponible)
+            String chauffeurStr = "-";
+            if (dto.getChauffeur() != null) {
+                String nom = dto.getChauffeur().getNom() == null ? "" : dto.getChauffeur().getNom();
+                String prenom = dto.getChauffeur().getPrenom() == null ? "" : dto.getChauffeur().getPrenom();
+                String full = (nom + " " + prenom).trim();
+                if (!full.isEmpty()) chauffeurStr = full;
+            }
+            item.put("chauffeur", chauffeurStr);
+
+            // Véhicule (immatriculation)
+            String vehiculeStr = "-";
+            if (dto.getVehicule() != null && dto.getVehicule().getImmatriculation() != null) {
+                vehiculeStr = dto.getVehicule().getImmatriculation();
+            }
+            item.put("vehicule", vehiculeStr);
+
+            // Chiffre d'affaires
+            item.put("chiffreAffaire", dto.getChiffreAffaire());
+
+            voyagesForView.add(item);
+        }
+
+        model.addAttribute("voyages", voyagesForView);
+        return "voyage/affaire";
     }
 
     // ----- CREATE FORM -----

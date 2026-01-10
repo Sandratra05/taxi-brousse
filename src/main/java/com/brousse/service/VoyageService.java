@@ -8,14 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.sql.Timestamp;
 import java.util.List;
 
+import com.brousse.dto.VoyageDTO;
 import com.brousse.dto.VoyageFilterDTO;
-import org.springframework.data.jpa.domain.Specification;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
-import jakarta.persistence.criteria.Order;
 import java.util.ArrayList;
 
 @Service
@@ -47,6 +45,54 @@ public class VoyageService {
     private VehiculesStatutRepository vehiculesStatutRepository;
 
     private static final Duration MARGE_TURNAROUND = Duration.ofMinutes(15);
+
+    public List<VoyageDTO> getVoyageChiffreAffaire() {
+
+        List<Object[]> results = voyageRepository.findVoyageChiffreAffaire();
+
+        List<VoyageDTO> dtos = new ArrayList<>();
+
+        for (Object[] record : results) {
+
+            VoyageDTO dto = new VoyageDTO();
+
+            dto.setId(((Integer) record[0]));                 // id du voyage
+            // dateDepart peut être renvoyé comme Timestamp, java.util.Date, LocalDateTime ou LocalDate
+            Object dateObj = record[1];
+            LocalDateTime dateDepart = null;
+            if (dateObj instanceof Timestamp) {
+                dateDepart = ((Timestamp) dateObj).toLocalDateTime();
+            } else if (dateObj instanceof java.time.LocalDateTime) {
+                dateDepart = (LocalDateTime) dateObj;
+            } else if (dateObj instanceof java.sql.Date) {
+                dateDepart = ((java.sql.Date) dateObj).toLocalDate().atStartOfDay();
+            } else if (dateObj instanceof java.util.Date) {
+                dateDepart = ((java.util.Date) dateObj).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            } else if (dateObj instanceof java.time.LocalDate) {
+                dateDepart = ((java.time.LocalDate) dateObj).atStartOfDay();
+            }
+            dto.setDateDepart(dateDepart); // date départ
+
+            // Mapping Chauffeur si présent (vérifie la longueur du record)
+            Chauffeur chauffeur = chauffeurRepository.findById((Integer) record[2]).orElse(null);
+            dto.setChauffeur(chauffeur);
+
+            // Mapping Vehicule minimal pour DTO
+            Vehicule vehicule = vehiculeRepository.findById((Integer) record[3]).orElse(null);
+            dto.setVehicule(vehicule);
+
+            Trajet trajet = trajetRepository.findById((Integer) record[4]).orElse(null);
+            dto.setTrajet(trajet);
+
+            // Champ calculé : chiffre d’affaires
+            dto.setChiffreAffaire(record[5] != null
+                ? ((Number) record[5]).doubleValue()
+                : 0.0);
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
 
     public Voyage creerVoyage(LocalDateTime dateDepart,
                              Integer idChauffeur,
