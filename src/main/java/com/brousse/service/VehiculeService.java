@@ -48,7 +48,7 @@ public class VehiculeService {
             dto.setModele((String) row[2]);
 
             dto.setChiffreAffaire(
-                row[3] != null ? ((Number) row[3]).doubleValue() : 0.0
+                (Number) row[3] != null ? ((Number) row[3]).doubleValue() : 0.0
             );
 
             result.add(dto);
