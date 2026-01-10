@@ -198,10 +198,85 @@ public class VoyageController {
 
             voyagesForView.add(item);
         }
+        model.addAttribute("trajets", trajetRepository.findAll());
+        model.addAttribute("vehicules", vehiculeRepository.findAll());
 
         model.addAttribute("voyages", voyagesForView);
         return "voyage/affaire";
     }
+
+    // ----- CHIFFRE D'AFFAIRES FILTRES -----
+    @GetMapping("/chiffreAffaire/filtres")
+    public String chiffreAffaireFiltres(
+            @RequestParam(required = false) Integer trajetId,
+            @RequestParam(required = false) Integer vehiculeId,
+            @RequestParam(required = false) String dateDebut,
+            @RequestParam(required = false) String dateFin,
+            Model model
+    ) {
+        List<VoyageDTO> results = voyageService.getVoyageChiffreAffaire();
+
+        java.time.LocalDateTime debut = parseDatetimeLocalToLdt(dateDebut);
+        java.time.LocalDateTime fin = parseDatetimeLocalToLdt(dateFin);
+
+        List<Map<String, Object>> voyagesForView = new ArrayList<>();
+        for (VoyageDTO dto : results) {
+            // appliquer les filtres
+            if (trajetId != null) {
+                if (dto.getTrajet() == null || dto.getTrajet().getId() == null || !dto.getTrajet().getId().equals(trajetId)) continue;
+            }
+            if (vehiculeId != null) {
+                if (dto.getVehicule() == null || dto.getVehicule().getId() == null || !dto.getVehicule().getId().equals(vehiculeId)) continue;
+            }
+            if (debut != null) {
+                if (dto.getDateDepart() == null || dto.getDateDepart().isBefore(debut)) continue;
+            }
+            if (fin != null) {
+                if (dto.getDateDepart() == null || dto.getDateDepart().isAfter(fin)) continue;
+            }
+
+            Map<String, Object> item = new HashMap<>();
+            item.put("dateDepart", dto.getDateDepart());
+
+            String trajetStr = "-";
+            if (dto.getTrajet() != null && dto.getTrajet().getGareDepart() != null && dto.getTrajet().getGareArrivee() != null) {
+                trajetStr = dto.getTrajet().getGareDepart().getNom() + " → " + dto.getTrajet().getGareArrivee().getNom();
+            }
+            item.put("trajet", trajetStr);
+
+            String chauffeurStr = "-";
+            if (dto.getChauffeur() != null) {
+                String nom = dto.getChauffeur().getNom() == null ? "" : dto.getChauffeur().getNom();
+                String prenom = dto.getChauffeur().getPrenom() == null ? "" : dto.getChauffeur().getPrenom();
+                String full = (nom + " " + prenom).trim();
+                if (!full.isEmpty()) chauffeurStr = full;
+            }
+            item.put("chauffeur", chauffeurStr);
+
+            String vehiculeStr = "-";
+            if (dto.getVehicule() != null && dto.getVehicule().getImmatriculation() != null) {
+                vehiculeStr = dto.getVehicule().getImmatriculation();
+            }
+            item.put("vehicule", vehiculeStr);
+
+            item.put("chiffreAffaire", dto.getChiffreAffaire());
+
+            voyagesForView.add(item);
+        }
+
+        // transmettre les listes pour les selects et les valeurs sélectionnées
+        model.addAttribute("trajets", trajetRepository.findAll());
+        model.addAttribute("vehicules", vehiculeRepository.findAll());
+        model.addAttribute("trajetId", trajetId);
+        model.addAttribute("vehiculeId", vehiculeId);
+        model.addAttribute("dateDebut", dateDebut);
+        model.addAttribute("dateFin", dateFin);
+
+        model.addAttribute("voyages", voyagesForView);
+        return "voyage/affaire";
+    }
+
+    
 
     // ----- CREATE FORM -----
     @GetMapping("/form")

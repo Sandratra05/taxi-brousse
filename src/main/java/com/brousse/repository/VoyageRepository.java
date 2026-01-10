@@ -38,19 +38,19 @@ public interface VoyageRepository extends JpaRepository<Voyage, Integer>, JpaSpe
     );
 
     @Query(value = """
-                SELECT
-                        vo.*,
-                        SUM(b.montant_total * pv.nb_place) AS chiffreAffaire
-                FROM vehicule v
-                JOIN voyage vo ON v.id_vehicule = vo.id_vehicule
-                JOIN billet b ON vo.id_voyage = b.id_voyage
-                JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
-                GROUP BY
-                        vo.id_voyage,
-                        vo.date_depart,
-                        vo.id_vehicule,
-                        vo.id_trajet 
-                ORDER BY id_voyage ASC;
+            SELECT
+                    vo.*,
+                    SUM(b.montant_total * pv.nb_place) AS chiffreAffaire
+            FROM vehicule v
+            JOIN voyage vo ON v.id_vehicule = vo.id_vehicule
+            JOIN billet b ON vo.id_voyage = b.id_voyage
+            JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
+            GROUP BY
+                    vo.id_voyage,
+                    vo.date_depart,
+                    vo.id_vehicule,
+                    vo.id_trajet 
+            ORDER BY id_voyage ASC;
         """, nativeQuery = true)
     List<Object[]> findVoyageChiffreAffaire();
 }
