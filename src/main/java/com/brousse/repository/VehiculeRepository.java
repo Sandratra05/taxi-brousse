@@ -31,7 +31,8 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
         GROUP BY
             v.id_vehicule,
             v.immatriculation,
-            v.modele;
+            v.modele
+        ORDER BY v.id_vehicule ASC;
         """, nativeQuery = true)
     List<Object[]> findChiffreAffaireParVehicule();
 }
