@@ -1,5 +1,6 @@
 package com.brousse.service;
 
+import com.brousse.dto.VehiculeDTO;
 import com.brousse.model.*;
 import com.brousse.repository.*;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,29 @@ public class VehiculeService {
         this.vehiculesStatutRepository = vehiculesStatutRepository;
         this.statutVehiculeRepository = statutVehiculeRepository;
         this.maintenanceVehiculeRepository = maintenanceVehiculeRepository;
+    }
+
+    // Avoir chiffre d affaire par vehicule
+    public List<VehiculeDTO> getChiffreAffaireParVehicule() {
+        List<Object[]> rows = vehiculeRepository.findChiffreAffaireParVehicule();
+        List<VehiculeDTO> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+
+            VehiculeDTO dto = new VehiculeDTO();
+
+            dto.setId(((Number) row[0]).intValue());
+            dto.setImmatriculation((String) row[1]);
+            dto.setModele((String) row[2]);
+
+            dto.setChiffreAffaire(
+                row[3] != null ? ((Number) row[3]).doubleValue() : 0.0
+            );
+
+            result.add(dto);
+        }
+
+        return result;
     }
 
     // Création d'un véhicule avec statut initial "disponible" et association à une configuration de places existante
