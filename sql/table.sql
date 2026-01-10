@@ -126,6 +126,7 @@ CREATE TABLE voyage(
 CREATE TABLE billet(
                        id_billet SERIAL,
                        montant_total NUMERIC(10,2)   NOT NULL,
+                       statut VARCHAR(50) ,
                        code_billet VARCHAR(100) ,
                        id_place INTEGER NOT NULL,
                        id_client INTEGER NOT NULL,
