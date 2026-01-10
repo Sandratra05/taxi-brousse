@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Liste des voyages</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <div class="content">
+
+    <h1>Liste des voyages avec chiffres d'affaires</h1>
+
+        <form action="/voyages/filtres" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
+            <h3>Filtrer les voyages</h3>
+
+            <label>Trajet:
+                <select name="trajetId">
+                    <option value="">-- Tous --</option>
+                    <option th:each="t : ${trajets}" 
+                            th:value="${t.id}" 
+                            th:text="${t.gareDepart.nom + ' → ' + t.gareArrivee.nom}"
+                            th:selected="${trajetId != null && trajetId == t.id}"></option>
+                </select>
+            </label>
+            
+            <label>Véhicule:
+                <select name="vehiculeId">
+                    <option value="">-- Tous --</option>
+                    <option th:each="v : ${vehicules}" 
+                            th:value="${v.id}" 
+                            th:text="${v.immatriculation}"
+                            th:selected="${vehiculeId != null && vehiculeId == v.id}"></option>
+                </select>
+            </label>
+            
+            <br/>
+            
+            <label>Date début: 
+                <input type="datetime-local" name="dateDebut" th:value="${dateDebut}"/>
+            </label>
+            
+            <label>Date fin: 
+                <input type="datetime-local" name="dateFin" th:value="${dateFin}"/>
+            </label>
+            
+            <br/>
+            
+            <button type="submit">Filtrer</button>
+            <a href="/voyages/chiffreAffaire">Réinitialiser</a>
+        </form>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Date départ</th>
+                <th>Trajet</th>
+                <th>Chauffeur</th>
+                <th>Véhicule</th>
+                <th>Chiffre d'affaires (Ar)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${voyages}">
+                <td><strong th:text="${item.dateDepart != null} ? ${#temporals.format(item.dateDepart, 'yyyy-MM-dd HH:mm')} : '-' "></strong></td>
+                <td th:text="${item.trajet}"></td>
+                <td th:text="${item.chauffeur}"></td>
+                <td th:text="${item.vehicule}"></td>
+                <td th:text="${item.chiffreAffaire} + ' Ar'"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(voyages)}">
+                <td colspan="5">Aucun voyage.</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="actions-buttons" style="margin-top:18px;">
+            <a th:href="@{/voyages}" class="btn"><i class="fas fa-arrow-left"></i> Retour</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
