@@ -26,5 +26,5 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
         JOIN client c ON b.id_client = c.id_client
         JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
         """, nativeQuery = true)
-    List<Object[]> findVehiculeWithChiffreAffaireRaw();
+    List<Object[]> findChiffreAffaireParVehicule();
 }
