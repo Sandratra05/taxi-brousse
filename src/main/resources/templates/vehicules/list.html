@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Liste des véhicules</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div class="content">
+        <h1>Liste des véhicules</h1>
+        <a href="/vehicules/create">Créer un véhicule</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Immatriculation</th>
+                    <th>Modèle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${vehiculesWithStatus}">
+                    <td th:text="${item.vehicule.id}"></td>
+                    <td><strong th:text="${item.vehicule.immatriculation}"></strong></td>
+                    <td th:text="${item.vehicule.modele}"></td>
+                    <td>
+                        <span th:if="${item.statut == 'Actif'}" class="status-actif" th:text="${item.statut}"></span>
+                        <span th:if="${item.statut == 'Maintenance'}" class="status-maintenance" th:text="${item.statut}"></span>
+                        <span th:if="${item.statut == 'Hors service'}" class="status-hors-service" th:text="${item.statut}"></span>
+                        <span th:if="${item.statut != 'Actif' && item.statut != 'Maintenance' && item.statut != 'Hors service'}" class="status-neutral" th:text="${item.statut}"></span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/vehicules/' + ${item.vehicule.id}}"><i class="fas fa-eye"></i> Détail</a>
+                        <a th:href="@{'/vehicules/' + ${item.vehicule.id} + '/edit'}"><i class="fas fa-edit"></i> Modifier</a>
+                        <form th:action="@{'/vehicules/' + ${item.vehicule.id} + '/delete'}" method="post" class="inline-form">
+                            <button type="submit" class="btn-danger"><i class="fas fa-trash"></i> Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

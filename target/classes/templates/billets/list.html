@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Liste des billets</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div class="content">
+        <h1>Liste des billets</h1>
+
+        <form action="/billets/list" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
+            <h3>Filtrer les billets</h3>
+
+            <label>Statut:
+                <select name="statut">
+                    <option value="">-- Tous --</option>
+                    <option value="Non Payé" th:selected="${statut == 'Non Payé'}">Non payé</option>
+                    <option value="Payé" th:selected="${statut == 'Payé'}">Payé</option>
+                </select>
+            </label>
+
+            <label>Voyage:
+                <select name="idVoyage">
+                    <option value="">-- Tous --</option>
+                    <option th:each="v : ${voyages}"
+                            th:value="${v.id}"
+                            th:text="${v.trajet.gareDepart.nom + ' → ' + v.trajet.gareArrivee.nom + ' (' + #temporals.format(v.dateDepart, 'yyyy-MM-dd HH:mm') + ')'}"
+                            th:selected="${idVoyage != null && idVoyage == v.id}"></option>
+                </select>
+            </label>
+
+            <br/>
+
+            <button type="submit">Filtrer</button>
+            <a href="/billets/list">Réinitialiser</a>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Code Billet</th>
+                    <th>Client</th>
+                    <th>Voyage</th>
+                    <th>Statut</th>
+                    <th>Montant Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="b : ${billets}">
+                    <td th:text="${b.id}"></td>
+                    <td><strong th:text="${b.codeBillet}"></strong></td>
+                    <td th:text="${b.client.nom + ' ' + b.client.prenom}"></td>
+                    <td th:text="${b.voyage.trajet.gareDepart.nom + ' → ' + b.voyage.trajet.gareArrivee.nom}"></td>
+                    <td>
+                        <span th:if="${b.statut == 'Payé'}" class="status-paye" th:text="${b.statut}"></span>
+                        <span th:if="${b.statut == 'Non Payé'}" class="status-non-paye" th:text="${b.statut}"></span>
+                    </td>
+                    <td><strong th:text="${#numbers.formatDecimal(b.montantTotal, 0, 'COMMA', 0, 'POINT') + ' Ar'}"></strong></td>
+                    <td>
+                        <a th:href="@{'/billets/' + ${b.id}}"><i class="fas fa-eye"></i> Détail</a>
+                        <a th:if="${b.statut == 'Non Payé'}" th:href="@{'/billets/formPayer/' + ${b.id}}" class="btn-success"><i class="fas fa-credit-card"></i> Payer</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

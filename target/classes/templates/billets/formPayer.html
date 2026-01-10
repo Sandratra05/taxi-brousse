@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Payer le billet</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h1>Paiement du billet</h1>
+
+    <div class="detail-card">
+        <h3><i class="fas fa-ticket-alt"></i> Informations du billet</h3>
+        <p><strong>Code billet:</strong> <span class="code-billet" th:text="${billet.codeBillet}"></span></p>
+        <p><strong>Statut:</strong>
+            <span th:if="${billet.statut == 'Non Payé'}" class="status-non-paye" th:text="${billet.statut}"></span>
+            <span th:if="${billet.statut == 'Payé'}" class="status-paye" th:text="${billet.statut}"></span>
+        </p>
+        <p><strong>Montant total:</strong> <span th:text="${billet.montantTotal + ' Ar'}"></span></p>
+        <p><strong>Client:</strong> <span th:text="${billet.client.nom + ' ' + billet.client.prenom}"></span></p>
+    </div>
+
+    <form th:action="@{/billets/{id}/payer(id=${billet.id})}" method="post">
+        <h3><i class="fas fa-credit-card"></i> Informations de paiement</h3>
+
+        <label>Date de paiement:
+            <input type="date" id="datePaiement" name="datePaiement" required/>
+        </label>
+
+        <label>Méthode de paiement:
+            <select id="idMethodePaiement" name="idMethodePaiement" required>
+                <option value="">-- Choisir une méthode --</option>
+                <option th:each="methode : ${methodesPaiement}"
+                        th:value="${methode.id}"
+                        th:text="${methode.libelle}"></option>
+            </select>
+        </label>
+
+        <div class="actions-buttons">
+            <button type="submit" class="btn-success">
+                <i class="fas fa-check"></i> Valider le paiement
+            </button>
+            <a th:href="@{/billets/{id}(id=${billet.id})}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Annuler
+            </a>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>

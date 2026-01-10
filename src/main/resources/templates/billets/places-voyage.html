@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Places du voyage</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h2>Places pour le voyage #<span th:text="${voyage.id}"></span></h2>
+
+    <p>
+        <strong>Trajet:</strong> <span th:text="${voyage.trajet.gareDepart.nom + ' → ' + voyage.trajet.gareArrivee.nom}"></span><br/>
+        <strong>Date départ:</strong> <span th:text="${#temporals.format(voyage.dateDepart, 'yyyy-MM-dd HH:mm')}"></span><br/>
+        <strong>Véhicule:</strong> <span th:text="${voyage.vehicule.immatriculation}"></span><br/>
+        <strong>Chauffeur:</strong> <span th:text="${voyage.chauffeur.nom + ' ' + voyage.chauffeur.prenom}"></span>
+    </p>
+
+    <a href="/voyages">Retour à la liste des voyages</a>
+
+    <h3>Liste des places</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Numéro de place</th>
+            <th>Statut</th>
+            <th>Client</th>
+            <th>Code billet</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="info : ${placesInfo}">
+            <td><strong th:text="${info.place.numero}"></strong></td>
+            <td>
+                <span th:if="${info.disponible}" class="status-disponible">Disponible</span>
+                <span th:if="${!info.disponible}" class="status-reserve">Réservée</span>
+            </td>
+            <td>
+                <span th:if="${!info.disponible && info.client != null}" 
+                      th:text="${info.client.nom + ' ' + info.client.prenom}"></span>
+                <span th:if="${info.disponible}" class="status-neutral">-</span>
+            </td>
+            <td>
+                <span th:if="${!info.disponible && info.billet != null}" 
+                      th:text="${info.billet.codeBillet}"></span>
+                <span th:if="${info.disponible}">-</span>
+            </td>
+            <td>
+                <a th:if="${info.disponible}" 
+                   th:href="@{/billets/voyage/{idVoyage}/place/{idPlace}/acheter(idVoyage=${voyage.id},idPlace=${info.place.id})}"
+                   class="btn btn-success">
+                    <i class="fas fa-ticket-alt"></i> Acheter billet
+                </a>
+                <a th:if="${!info.disponible && info.billet != null}" 
+                   th:href="@{/billets/{id}(id=${info.billet.id})}">
+                    <i class="fas fa-eye"></i> Voir billet
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(placesInfo)}">
+            <td colspan="5">Aucune place configurée pour ce véhicule.</td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Acheter un billet</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h1>Acheter un billet</h1>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+    </div>
+
+    <div class="detail-card">
+        <h3><i class="fas fa-info-circle"></i> Informations du voyage</h3>
+        <p><strong>Voyage:</strong> <span>#<span th:text="${voyage.id}"></span></span></p>
+        <p><strong>Trajet:</strong> <span th:text="${voyage.trajet.gareDepart.nom + ' → ' + voyage.trajet.gareArrivee.nom}"></span></p>
+        <p><strong>Date départ:</strong> <span th:text="${#temporals.format(voyage.dateDepart, 'yyyy-MM-dd HH:mm')}"></span></p>
+        <p><strong>Place:</strong> <span class="status-disponible" th:text="${place.numero}"></span></p>
+    </div>
+
+    <form th:action="@{/billets/voyage/{idVoyage}/place/{idPlace}/acheter(idVoyage=${voyage.id},idPlace=${place.id})}"
+          method="post">
+        
+        <h3><i class="fas fa-user"></i> Sélectionner le client</h3>
+
+        <label>Client:
+            <select name="clientId" required>
+                <option value="">-- Choisir un client --</option>
+                <option th:each="client : ${clients}" 
+                        th:value="${client.id}" 
+                        th:text="${client.nom + ' ' + client.prenom}"
+                        th:selected="${clientId != null && clientId == client.id}"></option>
+            </select>
+        </label>
+
+        <div class="actions-buttons">
+            <button type="submit" class="btn-success">
+                <i class="fas fa-check"></i> Confirmer l'achat
+            </button>
+            <a th:href="@{/billets/voyage/{id}/places(id=${voyage.id})}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Annuler
+            </a>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>

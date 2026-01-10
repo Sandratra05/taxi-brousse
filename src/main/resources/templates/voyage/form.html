@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title th:text="${mode == 'edit' ? 'Modifier un voyage' : 'Créer un voyage'}">Voyage</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h1 th:text="${mode == 'edit' ? 'Modifier un voyage' : 'Créer un voyage'}">Créer un voyage</h1>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> <strong>Erreur :</strong> <span th:text="${error}"></span>
+    </div>
+
+    <div th:if="${mode == 'edit' and (!canModifyAll and !canModifyStatus)}" class="alert alert-danger">
+        <i class="fas fa-ban"></i> Ce voyage est terminé ou annulé et ne peut plus être modifié.
+    </div>
+
+    <div th:if="${mode == 'edit'}" class="alert alert-info">
+        <span th:if="${!canModifyAll and canModifyStatus}">
+            <i class="fas fa-info-circle"></i> Voyage en cours → seul le <strong>statut</strong> est modifiable.
+        </span>
+        <span th:if="${canModifyAll}">
+            <i class="fas fa-check-circle"></i> Voyage prévu → tous les champs sont modifiables.
+        </span>
+    </div>
+
+    <form th:action="${mode == 'edit'} ? @{|/voyages/${voyage.id}|} : @{/voyages}"
+          method="post">
+
+        <h3><i class="fas fa-calendar-alt"></i> Informations du voyage</h3>
+
+        <label>Date départ
+            <input type="datetime-local" name="dateDepart"
+                   th:value="${mode == 'edit' ? #temporals.format(voyage.dateDepart, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                   th:disabled="${mode == 'edit' and !canModifyAll}"
+                   th:required="${mode != 'edit' or canModifyAll}">
+        </label>
+
+        <label>Chauffeur
+            <select name="idChauffeur"
+                    th:disabled="${mode == 'edit' and !canModifyAll}"
+                    th:required="${mode != 'edit' or canModifyAll}">
+                <option value="" disabled th:selected="${mode != 'edit'}">-- Choisir un chauffeur --</option>
+
+                <option th:each="c : ${chauffeurs}"
+                        th:value="${c.id}"
+                        th:selected="${mode == 'edit' and voyage.chauffeur != null and c.id == voyage.chauffeur.id}"
+                        th:text="${c.nom + ' ' + c.prenom}">
+                </option>
+            </select>
+        </label>
+
+        <label>Véhicule
+            <select name="idVehicule"
+                    th:disabled="${mode == 'edit' and !canModifyAll}"
+                    th:required="${mode != 'edit' or canModifyAll}">
+                <option value="" disabled th:selected="${mode != 'edit'}">-- Choisir un véhicule --</option>
+
+                <option th:each="v : ${vehicules}"
+                        th:value="${v.id}"
+                        th:selected="${mode == 'edit' and voyage.vehicule != null and v.id == voyage.vehicule.id}"
+                        th:text="${v.immatriculation + ' - ' + (v.modele != null ? v.modele : '')}">
+                </option>
+            </select>
+        </label>
+
+        <label>Trajet
+            <select name="idTrajet"
+                    th:disabled="${mode == 'edit' and !canModifyAll}"
+                    th:required="${mode != 'edit' or canModifyAll}">
+                <option value="" disabled th:selected="${mode != 'edit'}">-- Choisir un trajet --</option>
+
+                <option th:each="t : ${trajets}"
+                        th:value="${t.id}"
+                        th:selected="${mode == 'edit' and voyage.trajet != null and t.id == voyage.trajet.id}"
+                        th:text="${t.gareDepart.nom + ' → ' + t.gareArrivee.nom}">
+                </option>
+            </select>
+        </label>
+
+        <label>Statut
+            <select name="idVoyageStatut"
+                    th:disabled="${mode == 'edit' and !canModifyStatus}"
+                    required>
+                <option value="" disabled th:selected="${mode != 'edit'}">-- Choisir un statut --</option>
+
+                <option th:each="s : ${statuts}"
+                        th:value="${s.id}"
+                        th:text="${s.libelle}"
+                        th:selected="${mode == 'edit' and statut != null and s.libelle.equalsIgnoreCase(statut)}">
+                </option>
+            </select>
+        </label>
+
+        <div class="actions-buttons">
+            <button type="submit" class="btn-success">
+                <i class="fas fa-save"></i>
+                <span th:text="${mode == 'edit'} ? 'Mettre à jour' : 'Enregistrer'">Enregistrer</span>
+            </button>
+            <a th:href="@{/voyages}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                <span th:text="${mode == 'edit'} ? 'Retour' : 'Annuler'">Annuler</span>
+            </a>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>
+

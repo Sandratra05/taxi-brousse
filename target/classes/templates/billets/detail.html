@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Détail du billet</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h1>Détail du billet</h1>
+
+    <div class="detail-card">
+        <p><strong>Code billet:</strong> <span class="code-billet" th:text="${billet.codeBillet}"></span></p>
+        <p><strong>Statut:</strong>
+            <span th:if="${billet.statut == 'Payé'}" class="status-paye" th:text="${billet.statut}"></span>
+            <span th:if="${billet.statut == 'Non Payé'}" class="status-non-paye" th:text="${billet.statut}"></span>
+        </p>
+        <p><strong>Montant total:</strong> <span th:text="${billet.montantTotal + ' Ar'}"></span></p>
+        
+        <hr/>
+        
+        <h3><i class="fas fa-user"></i> Client</h3>
+        <p>
+            <strong>Nom:</strong> <span th:text="${billet.client.nom + ' ' + billet.client.prenom}"></span><br/>
+            <strong>Téléphone:</strong> <span th:text="${billet.client.telephone}"></span><br/>
+            <strong>Email:</strong> <span th:text="${billet.client.email}"></span>
+        </p>
+        
+        <hr/>
+        
+        <h3><i class="fas fa-route"></i> Voyage</h3>
+        <p>
+            <strong>Trajet:</strong> <span th:text="${billet.voyage.trajet.gareDepart.nom + ' → ' + billet.voyage.trajet.gareArrivee.nom}"></span><br/>
+            <strong>Date départ:</strong> <span th:text="${#temporals.format(billet.voyage.dateDepart, 'yyyy-MM-dd HH:mm')}"></span><br/>
+            <strong>Véhicule:</strong> <span th:text="${billet.voyage.vehicule.immatriculation}"></span><br/>
+            <strong>Chauffeur:</strong> <span th:text="${billet.voyage.chauffeur.nom + ' ' + billet.voyage.chauffeur.prenom}"></span>
+        </p>
+        
+        <hr/>
+        
+        <h3><i class="fas fa-chair"></i> Place</h3>
+        <p><strong>Numéro:</strong> <span th:text="${billet.place.numero}"></span></p>
+    </div>
+
+    <div class="actions-buttons">
+        <a th:href="@{/billets/voyage/{id}/places(id=${billet.voyage.id})}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour aux places</a>
+        <a href="/voyages" class="btn btn-secondary"><i class="fas fa-list"></i> Liste des voyages</a>
+        <a th:if="${billet.statut == 'Non Payé'}" th:href="@{/billets/formPayer/{id}(id=${billet.id})}" class="btn btn-success"><i class="fas fa-credit-card"></i> Payer</a>
+    </div>
+</div>
+
+</body>
+</html>

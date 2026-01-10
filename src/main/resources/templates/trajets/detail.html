@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Détail du trajet</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div class="content">
+        <h1>Détail du trajet</h1>
+
+        <div class="detail-card">
+            <h3><i class="fas fa-route"></i> Informations du trajet</h3>
+            <p><strong>Gare de départ:</strong> <span th:text="${trajet.gareDepart.nom}"></span></p>
+            <p><strong>Gare d'arrivée:</strong> <span th:text="${trajet.gareArrivee.nom}"></span></p>
+            <p><strong>Distance:</strong> <span th:text="${trajet.distanceKm + ' km'}"></span></p>
+            <p><strong>Durée estimée:</strong> <span th:text="${trajet.dureeEstimeeMinutes + ' minutes'}"></span></p>
+        </div>
+
+        <div class="detail-card" th:if="${tarif != null}">
+            <h3><i class="fas fa-money-bill-wave"></i> Tarification</h3>
+            <p><strong>Prix de base:</strong> <span th:text="${tarif.prixBase + ' Ar'}"></span></p>
+            <p><strong>Prix bagage:</strong> <span th:text="${tarif.prixBagage + ' Ar'}"></span></p>
+        </div>
+
+        <div class="alert alert-warning" th:if="${tarif == null}">
+            <i class="fas fa-exclamation-triangle"></i> Aucun tarif défini pour ce trajet
+        </div>
+
+        <div class="actions-buttons">
+            <a th:href="@{/trajets/{id}/edit(id=${trajet.id})}" class="btn"><i class="fas fa-edit"></i> Modifier</a>
+            <form th:action="@{/trajets/{id}/delete(id=${trajet.id})}" method="post" class="inline-form">
+                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce trajet ?')"><i class="fas fa-trash"></i> Supprimer</button>
+            </form>
+            <a href="/trajets" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+        </div>
+    </div>
+</body>
+</html>
+

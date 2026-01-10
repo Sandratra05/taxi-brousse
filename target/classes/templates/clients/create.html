@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Créer un client</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div class="content">
+        <h1>Créer un client</h1>
+
+        <form action="/clients" method="post">
+            <h3><i class="fas fa-user-plus"></i> Informations du client</h3>
+
+            <label>Nom:
+                <input type="text" name="nom" th:value="${nom}" placeholder="Nom du client" required/>
+            </label>
+            <span th:if="${nomError}" class="error-message" th:text="${nomError}"></span>
+
+            <label>Prénom:
+                <input type="text" name="prenom" th:value="${prenom}" placeholder="Prénom du client" required/>
+            </label>
+            <span th:if="${prenomError}" class="error-message" th:text="${prenomError}"></span>
+
+            <label>Téléphone:
+                <input type="tel" name="telephone" th:value="${telephone}" placeholder="Ex: 034 00 000 00"/>
+            </label>
+
+            <label>Email:
+                <input type="email" name="email" th:value="${email}" placeholder="exemple@email.com"/>
+            </label>
+
+            <div class="actions-buttons">
+                <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Créer</button>
+                <a href="/clients" class="btn btn-secondary"><i class="fas fa-times"></i> Annuler</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+

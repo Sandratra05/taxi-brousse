@@ -1,0 +1,9 @@
+Maintenant,creer une liste pour les trajets en affichant:nom du gare depart et arrive,distance et prix_base et prix_bagage et durree
+N'oublie pas les filtres
+
+Ok
+Maintenant,ajoutes un bouttin voir voyage dans les actions de liste de trajet
+On doit afficher les voyages qui utilise ce trajet,c'est a dire une liste de voyage mais avec un filtre de trajet
+
+Creer PlaceService,et ajoutes une methode pour voir si une place est disponible
+Une place est disponible si elle n'est pas rattacher a un billet:selection dans billet avec condition d'egalite voyage et place;si ca existe donc la place est deja prise
