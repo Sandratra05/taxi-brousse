@@ -1,5 +1,6 @@
 package com.brousse.controller;
 
+import com.brousse.dto.TrajetDTO;
 import com.brousse.dto.TrajetFilterDTO;
 import com.brousse.model.Gare;
 import com.brousse.model.Trajet;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/trajets")
@@ -22,6 +26,37 @@ public class TrajetController {
     public TrajetController(TrajetService trajetService, GareRepository gareRepository) {
         this.trajetService = trajetService;
         this.gareRepository = gareRepository;
+    }
+
+    // Affichage du chiffre d'affaires par trajet
+    @GetMapping("/chiffreAffaire")
+    public String affaire(Model model) {
+        List<TrajetDTO> list_trajetDTO = trajetService.getChiffreAffaireParTrajets();
+        List<Gare> list_gares = gareRepository.findAll();
+
+        Map<Integer, Gare> gareMap = new HashMap<>();
+        for (Gare g : list_gares) {
+            gareMap.put(g.getId(), g);
+        }
+
+        List<Map<String,Object>> viewList = new ArrayList<>();
+        for (TrajetDTO t : list_trajetDTO) {
+
+            Map<String,Object> m = new HashMap<>();
+            m.put("id", t.getId_trajet());
+            Gare gd = t.getGareDepart() != null ? gareMap.get(t.getGareDepart()) : null;
+            Gare ga = t.getGareArrivee() != null ? gareMap.get(t.getGareArrivee()) : null;
+            m.put("gareDepart", gd);
+            m.put("gareArrivee", ga);
+            m.put("distanceKm", t.getDistanceKm());
+            m.put("dureeEstimeeMinutes", t.getDureeEstimeeMinutes());
+            m.put("chiffreAffaire", t.getChiffreAffaire());
+            viewList.add(m);
+
+        }
+
+        model.addAttribute("trajets", viewList);
+        return "trajets/affaire";
     }
 
     // Liste des trajets avec filtres optionnels
