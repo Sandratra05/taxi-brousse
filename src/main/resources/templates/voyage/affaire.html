@@ -52,7 +52,7 @@
         </form>
 
         <div style="margin-top:12px; font-weight:600;">
-            <h2 th:if="${totalChiffreAffaire != null}">Total Chiffre d'Affaires : <span th:text="${totalChiffreAffaire} + ' Ar'"></span></h2>
+            <h2 th:if="${totalChiffreAffaire != null}">Total Chiffre d'Affaires : <span th:text="${#numbers.formatDecimal(totalChiffreAffaire, 0, 2)} + ' Ar'"></span></h2>
         </div>
 
         <table>
