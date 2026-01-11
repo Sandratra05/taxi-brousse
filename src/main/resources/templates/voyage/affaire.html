@@ -10,10 +10,10 @@
 
     <div class="content">
 
-    <h1>Liste des voyages avec chiffres d'affaires</h1>
+    <h1>Liste des Voyages avec Chiffres d'Affaires</h1>
 
         <form action="/voyages/chiffreAffaire/filtres" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
-            <h3>Filtrer les voyages</h3>
+            <h3>Filtrer les Chiffres d'Affaires</h3>
 
             <label>Trajet:
                 <select name="trajetId">
@@ -41,7 +41,7 @@
                 <input type="datetime-local" name="dateDebut" th:value="${dateDebut}"/>
             </label>
             
-            <label>Date fin: 
+            <label>Date     fin: 
                 <input type="datetime-local" name="dateFin" th:value="${dateFin}"/>
             </label>
             
@@ -50,6 +50,10 @@
             <button type="submit">Filtrer</button>
             <a href="/voyages/chiffreAffaire">Réinitialiser</a>
         </form>
+
+        <div style="margin-top:12px; font-weight:600;">
+            <h2 th:if="${totalChiffreAffaire != null}">Total Chiffre d'Affaires : <span th:text="${totalChiffreAffaire} + ' Ar'"></span></h2>
+        </div>
 
         <table>
             <thead>
