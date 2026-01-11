@@ -202,6 +202,15 @@ public class VoyageController {
         model.addAttribute("vehicules", vehiculeRepository.findAll());
 
         model.addAttribute("voyages", voyagesForView);
+        // Calcul du total du chiffre d'affaires
+        double totalCa = 0.0;
+        for (Map<String, Object> it : voyagesForView) {
+            Object ca = it.get("chiffreAffaire");
+            if (ca instanceof Number) {
+                totalCa += ((Number) ca).doubleValue();
+            }
+        }
+        model.addAttribute("totalChiffreAffaire", totalCa);
         return "voyage/affaire";
     }
 
@@ -264,7 +273,7 @@ public class VoyageController {
             voyagesForView.add(item);
         }
 
-        // transmettre les listes pour les selects et les valeurs sélectionnées
+        // transmettre les listes des donnees pour les filtres
         model.addAttribute("trajets", trajetRepository.findAll());
         model.addAttribute("vehicules", vehiculeRepository.findAll());
         model.addAttribute("trajetId", trajetId);
@@ -273,6 +282,16 @@ public class VoyageController {
         model.addAttribute("dateFin", dateFin);
 
         model.addAttribute("voyages", voyagesForView);
+
+        // Calcul du total du chiffre d'affaires pour les résultats filtrés
+        double totalCaFiltres = 0.0;
+        for (Map<String, Object> it : voyagesForView) {
+            Object ca = it.get("chiffreAffaire");
+            if (ca instanceof Number) {
+                totalCaFiltres += ((Number) ca).doubleValue();
+            }
+        }
+        model.addAttribute("totalChiffreAffaire", totalCaFiltres);
         return "voyage/affaire";
     }
 
