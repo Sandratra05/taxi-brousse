@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.brousse.dto.TrajetDTO;
 import com.brousse.dto.TrajetFilterDTO;
 import com.brousse.model.Trajet;
 import com.brousse.model.Tarif;
@@ -132,5 +133,38 @@ public class TrajetService {
         tarif.setPrixBagage(prixBagage != null ? prixBagage : BigDecimal.ZERO);
 
         return tarifRepository.save(tarif);
+    }
+
+    // Recuperer le chiffre d'affaires par trajet
+    public List<TrajetDTO> getChiffreAffaireParTrajets() {
+        List<Object[]> rows = trajetRepository.findChiffreAffaireParTrajets();
+        List<TrajetDTO> list_trajetDTO = new ArrayList<>();
+        for (Object[] r : rows) {
+            TrajetDTO dto = new TrajetDTO();
+            
+            if (r.length > 0 && r[0] != null) {
+                dto.setId_trajet(((Number) r[0]).intValue());
+            }
+            if (r.length > 1 && r[1] != null) { 
+                dto.setGareDepart(((Number) r[1]).intValue());
+            } 
+            if (r.length > 2 && r[2] != null) {
+                dto.setGareArrivee(((Number) r[2]).intValue());
+            }
+            if (r.length > 3 && r[3] != null) {
+                dto.setDistanceKm(new BigDecimal(r[3].toString()));
+            }
+            if (r.length > 4 && r[4] != null)  {
+                dto.setDureeEstimeeMinutes(((Number) r[4]).intValue());
+            }
+
+            if (r.length > 5 && r[5] != null) {
+                dto.setChiffreAffaire(((Number) r[5]).doubleValue());
+            } else {
+                dto.setChiffreAffaire(0.0);
+            }
+            list_trajetDTO.add(dto);
+        }
+        return list_trajetDTO;
     }
 }
