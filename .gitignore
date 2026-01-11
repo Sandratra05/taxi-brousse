@@ -1,0 +1,62 @@
+# Logs
+logs/
+*.log
+*.log.*
+spring.log
+
+# Runtime files
+tmp/
+*.pid
+*.seed
+*.pid.lock
+
+# Build outputs
+target/
+build/
+out/
+bin/
+
+# Maven
+.settings/
+dependency-reduced-pom.xml
+release.properties
+# Maven Wrapper (ne pas ignorer le jar du wrapper)
+.mvn/wrapper/maven-wrapper.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+
+# Environment / secrets
+.env
+.env.*
+*.keystore
+
+# Spring Boot config (variants locaux)
+application-local.properties
+application-local.yml
+application-*.local.properties
+application-*.local.yml
+
+# Test reports
+surefire-reports/
+failsafe-reports/
+jacoco.exec
+jacoco-report.xml
