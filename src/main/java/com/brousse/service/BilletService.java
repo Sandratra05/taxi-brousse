@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.Instant;
 
 @Service
 @Transactional
@@ -82,13 +83,12 @@ public class BilletService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Aucun tarif défini pour ce trajet"));
         
-        BigDecimal montantTotal = tarif.getPrixBase();
-        
+        BigDecimal montantTotal = tarif.getTarif();
+
         // Créer le billet
         Billet billet = new Billet();
         billet.setVoyage(voyage);
         billet.setPlace(place);
-        billet.setClient(client);
         billet.setMontantTotal(montantTotal);
         billet.setStatut("Non Payé");
         billet.setCodeBillet(genererCodeBillet());
@@ -141,7 +141,6 @@ public class BilletService {
 
         // Créer le paiement
         Paiement paiement = new Paiement();
-        paiement.setBillet(billet);
         paiement.setMontant(billet.getMontantTotal());
         MethodePaiement methode = methodePaiementRepository.findById(idMethodePaiement)
                 .orElseThrow(() -> new IllegalArgumentException("Méthode de paiement introuvable"));
@@ -151,10 +150,9 @@ public class BilletService {
 
         // Créer le statut de paiement
         StatutPaiement statutPaiement = new StatutPaiement();
-        statutPaiement.setId(new StatutPaiementId(paiement.getId(), 1)); // 1 = Effectué
         statutPaiement.setPaiement(paiement);
         statutPaiement.setPaiementStatut(paiementStatutRepository.findById(1).orElseThrow());
-        statutPaiement.setDateStatut(java.time.LocalDate.now());
+        statutPaiement.setDateStatut(Instant.now());
 
         statutPaiementRepository.save(statutPaiement);
     }

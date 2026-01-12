@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.sql.Timestamp;
@@ -42,7 +44,7 @@ public class VoyageService {
     private StatutVehiculeRepository statutVehiculeRepository;
 
     @Autowired
-    private VehiculesStatutRepository vehiculesStatutRepository;
+    private VehiculeStatutRepository vehiculeStatutRepository;
 
     private static final Duration MARGE_TURNAROUND = Duration.ofMinutes(15);
 
@@ -295,10 +297,9 @@ public class VoyageService {
         }
 
         StatutVoyage hist = new StatutVoyage();
-        hist.setId(new StatutVoyageId(voyage.getId(), idVoyageStatut));
         hist.setVoyage(voyage);
         hist.setVoyageStatut(ref);
-        hist.setDateStatut(LocalDateTime.now().toString());
+        hist.setDateStatut(Instant.now());
 
         statutVoyageRepository.save(hist);
     }
@@ -306,7 +307,7 @@ public class VoyageService {
     // -------------------- TEMPS / FIN ESTIMEE --------------------
 
     private LocalDateTime finEstimee(LocalDateTime depart, Trajet trajet) {
-        Integer d = trajet.getDureeEstimeeMinutes();
+        BigDecimal d = trajet.getDureeEstimeeMinutes();
         long minutes = (d == null ? 0L : d.longValue());
         return depart.plusMinutes(minutes);
     }
@@ -441,11 +442,11 @@ public class VoyageService {
 
     @Transactional(readOnly = true)
     public Integer getCurrentStatusId(Voyage voyage) {
-        List<StatutVoyage> statuts = statutVoyageRepository.findById_IdVoyageOrderByDateStatutDesc(voyage.getId());
+        List<StatutVoyage> statuts = statutVoyageRepository.findByVoyage_IdOrderByDateStatutDesc(voyage.getId());
         if (statuts.isEmpty()) {
             return null;
         }
-        return statuts.get(0).getId().getIdVoyageStatut();
+        return statuts.get(0).getVoyageStatut().getId();
     }
 
     @Transactional(readOnly = true)
@@ -463,7 +464,7 @@ public class VoyageService {
         if (statuts.isEmpty()) {
             return null;
         }
-        Integer statusId = statuts.get(0).getId().getIdVehiculesStatut();
-        return vehiculesStatutRepository.findById(statusId).map(VehiculesStatut::getLibelle).orElse(null);
+        Integer statusId = statuts.get(0).getVehiculeStatut().getId();
+        return vehiculeStatutRepository.findById(statusId).map(VehiculeStatut::getLibelle).orElse(null);
     }
 }

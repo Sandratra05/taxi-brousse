@@ -23,8 +23,4 @@ public interface BilletRepository extends JpaRepository<Billet, Integer> {
      */
     List<Billet> findByVoyage_Id(Integer idVoyage);
 
-    /**
-     * Récupère tous les billets d'un client
-     */
-    List<Billet> findByClient_Id(Integer idClient);
 }

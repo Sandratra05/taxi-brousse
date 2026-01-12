@@ -5,25 +5,28 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "maintenance_vehicule")
+@Table(name = "vehicule_maintenance")
 public class MaintenanceVehicule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_maintenance", nullable = false)
+    @Column(name = "id_vehicule_maintenance", nullable = false)
     private Integer id;
 
     @Column(name = "date_maintenance", nullable = false)
-    private LocalDate dateMaintenance;
+    private Instant dateMaintenance;
 
-    @Column(name = "description", length = Integer.MAX_VALUE)
+    @Column(name = "date_fin")
+    private Instant dateFin;
+
+    @Column(name = "description", nullable = false, length = 100)
     private String description;
 
-    @Column(name = "cout", precision = 10, scale = 2)
+    @Column(name = "cout", precision = 15, scale = 2)
     private BigDecimal cout;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

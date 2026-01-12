@@ -19,8 +19,7 @@
 
         <div class="detail-card" th:if="${tarif != null}">
             <h3><i class="fas fa-money-bill-wave"></i> Tarification</h3>
-            <p><strong>Prix de base:</strong> <span th:text="${tarif.prixBase + ' Ar'}"></span></p>
-            <p><strong>Prix bagage:</strong> <span th:text="${tarif.prixBagage + ' Ar'}"></span></p>
+            <p><strong>Tarif:</strong> <span th:text="${tarif.tarif + ' Ar'}"></span></p>
         </div>
 
         <div class="alert alert-warning" th:if="${tarif == null}">

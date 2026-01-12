@@ -14,12 +14,11 @@ public class Place {
     @Column(name = "id_place", nullable = false)
     private Integer id;
 
-    @Column(name = "numero", length = 50)
-    private String numero;
+    @Column(name = "numero", nullable = false)
+    private Integer numero;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_place_vehicule", nullable = false)
-    private PlaceVehicule placeVehicule;
-
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
 
 }

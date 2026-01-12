@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Entity
@@ -14,16 +16,18 @@ public class Vehicule {
     @Column(name = "id_vehicule", nullable = false)
     private Integer id;
 
-    @Column(name = "immatriculation", nullable = false, length = 50)
+    @Column(name = "immatriculation", nullable = false, length = 50, unique = true)
     private String immatriculation;
 
-    @Column(name = "modele", length = 100)
-    private String modele;
-
+    @Column(name = "consommation_l_100km", nullable = false, precision = 15, scale = 2)
+    private BigDecimal consommationL100km;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_place_vehicule", nullable = false)
-    private PlaceVehicule placeVehicule;
+    @JoinColumn(name = "id_categorie", nullable = false)
+    private Categorie categorie;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_vehicule_modele", nullable = false)
+    private VehiculeModele vehiculeModele;
 
 }

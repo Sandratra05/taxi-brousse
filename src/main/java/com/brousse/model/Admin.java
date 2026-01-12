@@ -17,17 +17,16 @@ public class Admin {
     @Column(name = "id_admin", nullable = false)
     private Integer id;
 
-    @Column(name = "nom", nullable = false, length = 100)
+    @Column(name = "nom", nullable = false, length = 50)
     private String nom;
 
-    @Column(name = "email", nullable = false, length = 150)
+    @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "mot_de_passe", nullable = false)
+    @Column(name = "mot_de_passe", nullable = false, length = 50)
     private String motDePasse;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "date_creation")
+    @Column(name = "date_creation", nullable = false)
     private Instant dateCreation;
 
 

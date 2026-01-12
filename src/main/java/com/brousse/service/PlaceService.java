@@ -69,7 +69,7 @@ public class PlaceService {
     /**
      * Récupère toutes les places d'une configuration de véhicule
      */
-    public List<Place> getPlacesByPlaceVehicule(Integer idPlaceVehicule) {
-        return placeRepository.findByPlaceVehicule_Id(idPlaceVehicule);
+    public List<Place> getPlacesByVehicule(Integer idVehicule) {
+        return placeRepository.findByVehicule_Id(idVehicule);
     }
 }

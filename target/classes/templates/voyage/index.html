@@ -14,6 +14,12 @@
 
     <a th:href="@{/voyages/form}">Nouveau voyage</a>
 
+    <div class="actions-buttons">
+        <a th:href="@{/voyages/chiffreAffaire}" class="btn">
+            <i class="fas fa-chart-line"></i> Voir Chiffre d'affaires
+        </a>
+    </div>
+
     <form action="/voyages" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
         <h3>Filtrer les voyages</h3>
 

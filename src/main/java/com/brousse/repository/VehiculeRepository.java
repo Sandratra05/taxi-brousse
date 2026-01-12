@@ -14,25 +14,26 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer> {
 //    List<Vehicule> findByStatutIgnoreCase(String statut);
 
     @Query("SELECT v FROM Vehicule v WHERE EXISTS (" +
-           "SELECT sv FROM StatutVehicule sv WHERE sv.id.idVehicule = v.id " +
-           "AND sv.id.idVehiculesStatut = :statutId)")
+           "SELECT sv FROM StatutVehicule sv WHERE sv.vehicule = v " +
+           "AND sv.vehiculeStatut.id = :statutId)")
     List<Vehicule> findByCurrentStatutId(@Param("statutId") Integer statutId);
 
     @Query(value = """
-                SELECT
+        SELECT
             v.id_vehicule,
             v.immatriculation,
-            v.modele,
-            SUM(b.montant_total * pv.nb_place) AS chiffreAffaire
+            CONCAT(vm.marque, ' ', vm.modele) as modele,
+            SUM(b.montant_total) AS chiffreAffaire
         FROM vehicule v
+        JOIN vehicule_modele vm ON v.id_vehicule_modele = vm.id_vehicule_modele
         JOIN voyage vo ON v.id_vehicule = vo.id_vehicule
         JOIN billet b ON vo.id_voyage = b.id_voyage
-        JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
         GROUP BY
             v.id_vehicule,
             v.immatriculation,
-            v.modele
+            vm.marque,
+            vm.modele
         ORDER BY v.id_vehicule ASC;
-        """, nativeQuery = true)
+    """, nativeQuery = true)
     List<Object[]> findChiffreAffaireParVehicule();
 }

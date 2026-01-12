@@ -4,26 +4,28 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "statut_vehicule")
 public class StatutVehicule {
-    @EmbeddedId
-    private StatutVehiculeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_statut_vehicule", nullable = false)
+    private Integer id;
 
-    @MapsId("idVehicule")
+    @Column(name = "date_statut", nullable = false)
+    private LocalDate dateStatut;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_vehicule_statut", nullable = false)
+    private VehiculeStatut vehiculeStatut;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_vehicule", nullable = false)
     private Vehicule vehicule;
-
-    @MapsId("idVehiculesStatut")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_vehicules_statut", nullable = false)
-    private VehiculesStatut vehiculesStatut;
-
-    @Column(name = "date_statut", length = 50)
-    private String dateStatut;
 
 
 }

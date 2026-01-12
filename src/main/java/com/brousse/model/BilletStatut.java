@@ -7,15 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "vehicules_statut")
-public class VehiculesStatut {
+@Table(name = "billet_statut")
+public class BilletStatut {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_vehicules_statut", nullable = false)
+    @Column(name = "id_billet_statut", nullable = false)
     private Integer id;
 
-    @Column(name = "libelle", length = 50)
+    @Column(name = "libelle", nullable = false, length = 50)
     private String libelle;
 
-
 }
+

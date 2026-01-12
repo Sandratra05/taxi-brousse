@@ -121,7 +121,7 @@ public class TrajetService {
     }
 
     // Create or update tarif for a trajet
-    public Tarif createOrUpdateTarif(Trajet trajet, BigDecimal prixBase, BigDecimal prixBagage) {
+    public Tarif createOrUpdateTarif(Trajet trajet, BigDecimal prixBase) {
         Tarif tarif = getTarifForTrajet(trajet.getId());
 
         if (tarif == null) {
@@ -129,8 +129,7 @@ public class TrajetService {
             tarif.setTrajet(trajet);
         }
 
-        tarif.setPrixBase(prixBase);
-        tarif.setPrixBagage(prixBagage != null ? prixBagage : BigDecimal.ZERO);
+        tarif.setTarif(prixBase);
 
         return tarifRepository.save(tarif);
     }

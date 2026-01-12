@@ -87,8 +87,7 @@ public class BilletController {
                 .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
 
         // Récupérer toutes les places de la configuration du véhicule
-        Integer idPlaceVehicule = voyage.getVehicule().getPlaceVehicule().getId();
-        List<Place> toutesLesPlaces = placeService.getPlacesByPlaceVehicule(idPlaceVehicule);
+        List<Place> toutesLesPlaces = placeService.getPlacesByVehicule(voyage.getVehicule().getId());
         
         // Créer une map des places avec leurs infos
         List<Map<String, Object>> placesInfo = new ArrayList<>();
@@ -104,7 +103,6 @@ public class BilletController {
                 // Récupérer le billet associé
                 Optional<Billet> billet = billetService.getBilletByPlaceAndVoyage(place.getId(), idVoyage);
                 billet.ifPresent(b -> {
-                    info.put("client", b.getClient());
                     info.put("billet", b);
                 });
             }
@@ -217,4 +215,3 @@ public class BilletController {
         return "billets/form-voyage";
     }
 }
-
