@@ -44,7 +44,13 @@ public class BilletService {
     private MethodePaiementRepository methodePaiementRepository;
 
     @Autowired
-    private PlaceService placeService;  
+    private PlaceService placeService;
+
+    @Autowired
+    private CommandeRepository commandeRepository;
+
+    @Autowired
+    private DetailsCommandeRepository detailsCommandeRepository;
 
     /**
      * Récupère un billet par place et voyage
@@ -155,5 +161,71 @@ public class BilletService {
         statutPaiement.setDateStatut(Instant.now());
 
         statutPaiementRepository.save(statutPaiement);
+    }
+
+    /**
+     * Acheter plusieurs billets en une commande
+     */
+    public Integer acheterBilletsEnCommande(Integer idVoyage, List<Integer> placesIds, Integer idClient) {
+        // Vérifications
+        Voyage voyage = voyageRepository.findById(idVoyage)
+                .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
+
+        Client client = clientRepository.findById(idClient)
+                .orElseThrow(() -> new IllegalArgumentException("Client introuvable"));
+
+        // Calculer le tarif pour ce voyage
+        Trajet trajet = voyage.getTrajet();
+        List<Tarif> tarifs = tarifRepository.findAll();
+        Tarif tarif = tarifs.stream()
+                .filter(t -> t.getTrajet().getId().equals(trajet.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Aucun tarif défini pour ce trajet"));
+
+        BigDecimal tarifUnitaire = tarif.getTarif();
+        BigDecimal montantTotal = BigDecimal.ZERO;
+
+        // Créer la commande
+        Commande commande = new Commande();
+        commande.setClient(client);
+        commande.setDate(Instant.now());
+
+        // Créer les billets et calculer le montant total
+        for (Integer idPlace : placesIds) {
+            Place place = placeRepository.findById(idPlace)
+                    .orElseThrow(() -> new IllegalArgumentException("Place introuvable: " + idPlace));
+
+            // Vérifier que la place est disponible
+            if (!placeService.isPlaceDisponible(idPlace, idVoyage)) {
+                throw new IllegalStateException("La place " + place.getNumero() + " n'est plus disponible");
+            }
+
+            montantTotal = montantTotal.add(tarifUnitaire);
+        }
+
+        commande.setMontantTotal(montantTotal);
+        commande = commandeRepository.save(commande);
+
+        // Créer les billets et les détails de commande
+        for (Integer idPlace : placesIds) {
+            Place place = placeRepository.findById(idPlace).orElseThrow();
+
+            // Créer le billet
+            Billet billet = new Billet();
+            billet.setVoyage(voyage);
+            billet.setPlace(place);
+            billet.setMontantTotal(tarifUnitaire);
+            billet.setStatut("Non Payé");
+            billet.setCodeBillet(genererCodeBillet());
+            billet = billetRepository.save(billet);
+
+            // Créer le détail de commande
+            DetailsCommande detail = new DetailsCommande();
+            detail.setCommande(commande);
+            detail.setBillet(billet);
+            detailsCommandeRepository.save(detail);
+        }
+
+        return commande.getId();
     }
 }

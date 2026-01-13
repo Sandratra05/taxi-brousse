@@ -3,11 +3,14 @@ package com.brousse.controller;
 import com.brousse.model.Billet;
 import com.brousse.model.Voyage;
 import com.brousse.model.Place;
-import com.brousse.model.Vehicule;
+import com.brousse.model.Commande;
+import com.brousse.model.DetailsCommande;
 import com.brousse.repository.ClientRepository;
 import com.brousse.repository.VoyageRepository;
 import com.brousse.repository.PlaceRepository;
 import com.brousse.repository.MethodePaiementRepository;
+import com.brousse.repository.CommandeRepository;
+import com.brousse.repository.DetailsCommandeRepository;
 import com.brousse.service.BilletService;
 import com.brousse.service.PlaceService;
 import com.brousse.service.VoyageService;
@@ -42,6 +45,12 @@ public class BilletController {
 
     @Autowired
     private VoyageService voyageService;
+
+    @Autowired
+    private CommandeRepository commandeRepository;
+
+    @Autowired
+    private DetailsCommandeRepository detailsCommandeRepository;
 
     @GetMapping("/list")
     public String list(
@@ -117,54 +126,69 @@ public class BilletController {
     }
 
     /**
-     * Formulaire d'achat de billet
+     * Formulaire d'achat de billets avec sélection visuelle des places
      */
-    @GetMapping("/voyage/{idVoyage}/place/{idPlace}/acheter")
+    @GetMapping("/voyage/{idVoyage}/acheter")
     public String showAcheterForm(
             @PathVariable Integer idVoyage,
-            @PathVariable Integer idPlace,
             Model model
     ) {
-        // Vérifier la disponibilité
-        if (!placeService.isPlaceDisponible(idPlace, idVoyage)) {
-            model.addAttribute("error", "Cette place n'est plus disponible");
-            return "redirect:/billets/voyage/" + idVoyage + "/places";
-        }
-        
-        Voyage voyage = voyageRepository.findById(idVoyage).orElse(null);
-        Place place = placeRepository.findById(idPlace).orElse(null);
-        
-        if (voyage == null || place == null) {
-            return "redirect:/voyages";
+        Voyage voyage = voyageRepository.findById(idVoyage)
+                .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
+
+        // Récupérer toutes les places de la configuration du véhicule
+        List<Place> toutesLesPlaces = placeService.getPlacesByVehicule(voyage.getVehicule().getId());
+
+        // Créer une map des places avec leurs infos
+        List<Map<String, Object>> placesInfo = new ArrayList<>();
+
+        for (Place place : toutesLesPlaces) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("place", place);
+
+            boolean disponible = placeService.isPlaceDisponible(place.getId(), idVoyage);
+            info.put("disponible", disponible);
+
+            if (!disponible) {
+                // Récupérer le billet associé
+                Optional<Billet> billet = billetService.getBilletByPlaceAndVoyage(place.getId(), idVoyage);
+                billet.ifPresent(b -> {
+                    info.put("billet", b);
+                });
+            }
+
+            placesInfo.add(info);
         }
         
         model.addAttribute("voyage", voyage);
-        model.addAttribute("place", place);
+        model.addAttribute("placesInfo", placesInfo);
         model.addAttribute("clients", clientRepository.findAll());
         
         return "billets/acheter-form";
     }
 
     /**
-     * Traitement de l'achat de billet
+     * Traitement de l'achat de billets multiples
      */
-    @PostMapping("/voyage/{idVoyage}/place/{idPlace}/acheter")
-    public String acheterBillet(
+    @PostMapping("/voyage/{idVoyage}/acheter")
+    public String acheterBillets(
             @PathVariable Integer idVoyage,
-            @PathVariable Integer idPlace,
+            @RequestParam(value = "placesIds", required = false) List<Integer> placesIds,
             @RequestParam Integer clientId,
             Model model
     ) {
         try {
-            Billet billet = billetService.acheterBillet(idVoyage, idPlace, clientId);
-            return "redirect:/billets/" + billet.getId();
+            if (placesIds == null || placesIds.isEmpty()) {
+                throw new IllegalArgumentException("Veuillez sélectionner au moins une place");
+            }
+
+            // Créer une commande pour tous les billets
+            Integer commandeId = billetService.acheterBilletsEnCommande(idVoyage, placesIds, clientId);
+
+            return "redirect:/billets/commande/" + commandeId;
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("voyage", voyageRepository.findById(idVoyage).orElse(null));
-            model.addAttribute("place", placeRepository.findById(idPlace).orElse(null));
-            model.addAttribute("clients", clientRepository.findAll());
-            model.addAttribute("clientId", clientId);
-            return "billets/acheter-form";
+            return showAcheterForm(idVoyage, model);
         }
     }
 
@@ -213,5 +237,21 @@ public class BilletController {
                 .collect(java.util.stream.Collectors.toList());
         model.addAttribute("voyages", voyagesPrevues);
         return "billets/form-voyage";
+    }
+
+    /**
+     * Afficher les détails d'une commande
+     */
+    @GetMapping("/commande/{id}")
+    public String detailCommande(@PathVariable Integer id, Model model) {
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Commande introuvable"));
+
+        List<DetailsCommande> detailsCommande = detailsCommandeRepository.findByCommande_Id(id);
+
+        model.addAttribute("commande", commande);
+        model.addAttribute("detailsCommande", detailsCommande);
+
+        return "billets/commande-detail";
     }
 }

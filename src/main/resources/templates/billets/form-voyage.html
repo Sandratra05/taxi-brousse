@@ -31,8 +31,8 @@
             <td th:text="${v.chauffeur.nom + ' ' + v.chauffeur.prenom}"></td>
             <td th:text="${v.vehicule.immatriculation}"></td>
             <td>
-                <a th:href="@{/billets/voyage/{id}/places(id=${v.id})}" class="btn btn-success">
-                    <i class="fas fa-ticket-alt"></i> Acheter des billets
+                <a th:href="@{/billets/voyage/{id}/acheter(id=${v.id})}" class="btn btn-success">
+                    <i class="fas fa-shopping-cart"></i> Acheter des billets
                 </a>
             </td>
         </tr>
