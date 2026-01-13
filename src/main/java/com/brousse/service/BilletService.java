@@ -141,6 +141,14 @@ public class BilletService {
             throw new IllegalStateException("Ce billet est déjà payé");
         }
 
+        // Parser la date de paiement
+        Instant datePaiementInstant;
+        try {
+            datePaiementInstant = Instant.parse(datePaiement + "T00:00:00Z"); // Assuming date format is YYYY-MM-DD
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Format de date invalide");
+        }
+
         // Mettre à jour le statut du billet
         billet.setStatut("Payé");
         billetRepository.save(billet);
@@ -148,6 +156,7 @@ public class BilletService {
         // Créer le paiement
         Paiement paiement = new Paiement();
         paiement.setMontant(billet.getMontantTotal());
+        paiement.setDatePaiement(datePaiementInstant);
         MethodePaiement methode = methodePaiementRepository.findById(idMethodePaiement)
                 .orElseThrow(() -> new IllegalArgumentException("Méthode de paiement introuvable"));
         paiement.setMethodePaiement(methode);
@@ -227,5 +236,63 @@ public class BilletService {
         }
 
         return commande.getId();
+    }
+
+    /**
+     * Payer une commande (tous les billets de la commande)
+     */
+    public void payerCommande(Integer idCommande, String datePaiement, Integer idMethodePaiement) {
+        Commande commande = commandeRepository.findById(idCommande)
+                .orElseThrow(() -> new IllegalArgumentException("Commande introuvable"));
+
+        // Parser la date de paiement
+        Instant datePaiementInstant;
+        try {
+            datePaiementInstant = Instant.parse(datePaiement + "T00:00:00Z"); // Assuming date format is YYYY-MM-DD
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Format de date invalide");
+        }
+
+        // Récupérer tous les détails de la commande
+        List<DetailsCommande> details = detailsCommandeRepository.findByCommande_Id(idCommande);
+
+        if (details.isEmpty()) {
+            throw new IllegalStateException("Aucun billet dans cette commande");
+        }
+
+        // Vérifier que tous les billets ne sont pas déjà payés
+        for (DetailsCommande detail : details) {
+            if ("Payé".equals(detail.getBillet().getStatut())) {
+                throw new IllegalStateException("Certains billets de cette commande sont déjà payés");
+            }
+        }
+
+        // Payer chaque billet
+        for (DetailsCommande detail : details) {
+            Billet billet = detail.getBillet();
+
+            // Mettre à jour le statut du billet
+            billet.setStatut("Payé");
+            billetRepository.save(billet);
+
+            // Créer le paiement pour ce billet
+            Paiement paiement = new Paiement();
+            paiement.setMontant(billet.getMontantTotal());
+            paiement.setDatePaiement(datePaiementInstant);
+            paiement.setCommande(commande);  // Ajouter la référence à la commande
+            MethodePaiement methode = methodePaiementRepository.findById(idMethodePaiement)
+                    .orElseThrow(() -> new IllegalArgumentException("Méthode de paiement introuvable"));
+            paiement.setMethodePaiement(methode);
+
+            paiement = paiementRepository.save(paiement);
+
+            // Créer le statut de paiement
+            StatutPaiement statutPaiement = new StatutPaiement();
+            statutPaiement.setPaiement(paiement);
+            statutPaiement.setPaiementStatut(paiementStatutRepository.findById(1).orElseThrow());
+            statutPaiement.setDateStatut(Instant.now());
+
+            statutPaiementRepository.save(statutPaiement);
+        }
     }
 }

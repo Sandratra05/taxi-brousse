@@ -6,7 +6,7 @@
     <style>
         .content {
             padding: 20px;
-            margin-left: 260px;
+            margin-left: 300px;
         }
 
         .detail-card {
@@ -306,36 +306,6 @@
         </div>
     </div>
 
-    <!-- Disposition des places du véhicule -->
-    <div class="vehicle-layout">
-        <div class="driver-area">
-            <div class="driver-seat">🚗</div>
-            <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Chauffeur</div>
-        </div>
-
-        <div class="seats-grid" id="seatsGrid">
-            <!-- Les places seront générées par Thymeleaf -->
-            <div th:each="info : ${placesInfo}"
-                 th:classappend="${info.disponible} ? 'disponible' : 'occupee'"
-                 class="seat"
-                 th:data-place-id="${info.place.id}"
-                 th:onclick="${info.disponible} ? 'toggleSeat(this)' : ''">
-                <input type="checkbox"
-                       th:name="'placesIds'"
-                       th:value="${info.place.id}"
-                       th:disabled="${!info.disponible}"
-                       th:id="'place-' + ${info.place.id}">
-                <span class="seat-number" th:text="${info.place.numero}"></span>
-                <span th:if="${!info.disponible}" style="font-size: 10px; color: white;">🔒</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Informations de sélection -->
-    <div class="selection-info" id="selectionInfo">
-        <span id="selectedCount">0</span> place(s) sélectionnée(s)
-    </div>
-
     <!-- Formulaire -->
     <form th:action="@{/billets/voyage/{idVoyage}/acheter(idVoyage=${voyage.id})}"
           method="post" id="achatForm">
@@ -352,6 +322,38 @@
                 </select>
             </label>
         </div>
+
+
+        <!-- Disposition des places du véhicule -->
+        <div class="vehicle-layout">
+            <div class="driver-area">
+                <div class="driver-seat">🚗</div>
+                <div style="font-size: 14px; color: #7f8c8d; margin-top: 5px;">Chauffeur</div>
+            </div>
+
+            <div class="seats-grid" id="seatsGrid">
+                <!-- Les places seront générées par Thymeleaf -->
+                <div th:each="info : ${placesInfo}"
+                     th:classappend="${info.disponible} ? 'disponible' : 'occupee'"
+                     class="seat"
+                     th:data-place-id="${info.place.id}"
+                     th:onclick="${info.disponible} ? 'toggleSeat(this)' : ''">
+                    <input type="checkbox"
+                           th:name="'placesIds'"
+                           th:value="${info.place.id}"
+                           th:disabled="${!info.disponible}"
+                           th:id="'place-' + ${info.place.id}">
+                    <span class="seat-number" th:text="${info.place.numero}"></span>
+                    <span th:if="${!info.disponible}" style="font-size: 10px; color: white;">🔒</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de sélection -->
+        <div class="selection-info" id="selectionInfo">
+            <span id="selectedCount">0</span> place(s) sélectionnée(s)
+        </div>
+
 
         <div class="actions-buttons">
             <button type="submit" class="btn-success" id="btnAcheter" disabled>

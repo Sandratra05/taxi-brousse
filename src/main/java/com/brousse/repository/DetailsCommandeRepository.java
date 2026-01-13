@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DetailsCommandeRepository extends JpaRepository<DetailsCommande, Integer> {
     List<DetailsCommande> findByCommande_Id(Integer idCommande);
+    List<DetailsCommande> findByBillet_Id(Integer idBillet);
 }
