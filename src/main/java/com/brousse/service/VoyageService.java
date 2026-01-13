@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.sql.Timestamp;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
 
 import com.brousse.dto.VoyageDTO;
 import com.brousse.dto.VoyageFilterDTO;
@@ -157,45 +159,41 @@ public class VoyageService {
     }
 
     public List<Voyage> listerVoyagesAvecFiltre(VoyageFilterDTO filtres) {
-        List<Voyage> voyages = voyageRepository.findAll();
+        Specification<Voyage> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        // Filter in memory
-        if (filtres.getTrajetId() != null) {
-            voyages = voyages.stream()
-                    .filter(v -> v.getTrajet().getId().equals(filtres.getTrajetId()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
+            if (filtres.getTrajetId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("trajet").get("id"), filtres.getTrajetId()));
+            }
 
-        if (filtres.getChauffeurId() != null) {
-            voyages = voyages.stream()
-                    .filter(v -> v.getChauffeur().getId().equals(filtres.getChauffeurId()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
+            if (filtres.getChauffeurId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("chauffeur").get("id"), filtres.getChauffeurId()));
+            }
 
-        if (filtres.getVehiculeId() != null) {
-            voyages = voyages.stream()
-                    .filter(v -> v.getVehicule().getId().equals(filtres.getVehiculeId()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
+            if (filtres.getVehiculeId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("vehicule").get("id"), filtres.getVehiculeId()));
+            }
 
+            if (filtres.getDateDebut() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("dateDepart"), filtres.getDateDebut()));
+            }
+
+            if (filtres.getDateFin() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("dateDepart"), filtres.getDateFin()));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        List<Voyage> voyages = voyageRepository.findAll(spec);
+
+        // Filter status in memory
         if (filtres.getStatutId() != null) {
             voyages = voyages.stream()
                     .filter(v -> {
                         Integer currentStatusId = getCurrentStatusId(v);
                         return currentStatusId != null && currentStatusId.equals(filtres.getStatutId());
                     })
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        if (filtres.getDateDebut() != null) {
-            voyages = voyages.stream()
-                    .filter(v -> v.getDateDepart().isAfter(filtres.getDateDebut()) || v.getDateDepart().equals(filtres.getDateDebut()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        if (filtres.getDateFin() != null) {
-            voyages = voyages.stream()
-                    .filter(v -> v.getDateDepart().isBefore(filtres.getDateFin()) || v.getDateDepart().equals(filtres.getDateFin()))
                     .collect(java.util.stream.Collectors.toList());
         }
 

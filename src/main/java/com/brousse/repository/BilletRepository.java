@@ -2,13 +2,14 @@ package com.brousse.repository;
 
 import com.brousse.model.Billet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface BilletRepository extends JpaRepository<Billet, Integer> {
-    
+public interface BilletRepository extends JpaRepository<Billet, Integer>, JpaSpecificationExecutor<Billet> {
+
     /**
      * Vérifie si un billet existe pour une place et un voyage donnés
      *

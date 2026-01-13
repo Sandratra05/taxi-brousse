@@ -3,6 +3,7 @@ package com.brousse.service;
 import com.brousse.dto.VehiculeDTO;
 import com.brousse.model.*;
 import com.brousse.repository.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
