@@ -14,7 +14,8 @@ INSERT INTO unite (nom, code) VALUES
 ('Litre', 'L'),
 ('Heure', 'h'),
 ('Kilogramme', 'kg'),
-('Places', 'place(s)');
+('Places', 'place(s)'),
+('km/h', 'km/h');
 
 -- Insertion des catégories de véhicule
 INSERT INTO categorie (code, nom, ordre, active) VALUES
@@ -22,11 +23,11 @@ INSERT INTO categorie (code, nom, ordre, active) VALUES
 ('VIP', 'VIP', 2, true);
 
 -- Insertion des modèles de véhicule
-INSERT INTO vehicule_modele (marque, modele, consommation_l_100km) VALUES
-('Mercedes Benz', 'Sprinter', 12.5),
-('Iveco', 'Daily', 10.0),
-('Scania', 'Scania', 15.0),
-('Volvo', 'Volvo', 14.0);
+INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
+('Mercedes Benz', 'Sprinter', 12.5, 32),
+('Iveco', 'Daily', 10.0, 16),
+('Scania', 'Scania', 15.0, 50),
+('Volvo', 'Volvo', 14.0, 45);
 
 -- Insertion des véhicules
 INSERT INTO vehicule (immatriculation, consommation_l_100km, id_categorie, id_vehicule_modele) VALUES
@@ -104,7 +105,7 @@ INSERT INTO chauffeur (nom, prenom, telephone) VALUES
 
 -- Insertion des caractéristiques
 INSERT INTO caracteristique (libelle, id_unite) VALUES
-('Vitesse maximale', 1), -- km/h, but unite has km, need to add h
+('Vitesse maximale', 6), -- km/h
 ('Capacité bagage', 4), -- kg
 ('Capacité places', 5); -- places
 

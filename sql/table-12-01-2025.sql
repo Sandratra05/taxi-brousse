@@ -37,6 +37,7 @@ CREATE TABLE vehicule_modele(
    marque VARCHAR(50) NOT NULL,
    modele VARCHAR(50) NOT NULL,
    consommation_l_100km NUMERIC(15,2),
+   place INTEGER NOT NULL,
    PRIMARY KEY(id_vehicule_modele)
 );
 
