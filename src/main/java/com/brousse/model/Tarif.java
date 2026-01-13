@@ -3,9 +3,9 @@ package com.brousse.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -17,12 +17,15 @@ public class Tarif {
     @Column(name = "id_tarif", nullable = false)
     private Integer id;
 
-    @Column(name = "prix_base", nullable = false, precision = 10, scale = 2)
-    private BigDecimal prixBase;
+    @Column(name = "date_tarif", nullable = false)
+    private LocalDate dateTarif;
 
-    @ColumnDefault("0")
-    @Column(name = "prix_bagage", precision = 10, scale = 2)
-    private BigDecimal prixBagage;
+    @Column(name = "tarif", nullable = false, precision = 15, scale = 2)
+    private BigDecimal tarif;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_categorie", nullable = false)
+    private Categorie categorie;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_trajet", nullable = false)

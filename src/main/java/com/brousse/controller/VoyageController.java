@@ -2,14 +2,14 @@ package com.brousse.controller;
 
 import com.brousse.dto.VoyageFilterDTO;
 import com.brousse.dto.VoyageDTO;
-import com.brousse.model.VehiculesStatut;
 import com.brousse.model.Voyage;
 import com.brousse.model.Vehicule;
+import com.brousse.model.VehiculeStatut;
 import com.brousse.repository.ChauffeurRepository;
 import com.brousse.repository.VoyageStatutRepository;
 import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.VehiculeRepository;
-import com.brousse.repository.VehiculesStatutRepository;
+import com.brousse.repository.VehiculeStatutRepository;
 import com.brousse.service.VoyageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,7 +43,7 @@ public class VoyageController {
     private VoyageStatutRepository voyageStatutRepository;
 
     @Autowired
-    private VehiculesStatutRepository vehiculesStatutRepository;
+    private VehiculeStatutRepository vehiculeStatutRepository;
 
     // ----- Helpers -----
     private void chargerListesForm(Model model, Voyage voyageEnEdition) {
@@ -52,7 +52,7 @@ public class VoyageController {
         model.addAttribute("statuts", voyageStatutRepository.findAll());
 
         // Trouver l'ID du statut "Disponible"
-        VehiculesStatut statutDisponible = vehiculesStatutRepository.findByLibelle("Disponible")
+        VehiculeStatut statutDisponible = vehiculeStatutRepository.findByLibelle("Disponible")
                 .orElseThrow(() -> new IllegalStateException("Statut 'Disponible' introuvable"));
         List<Vehicule> vehicules = vehiculeRepository.findByCurrentStatutId(statutDisponible.getId());
 

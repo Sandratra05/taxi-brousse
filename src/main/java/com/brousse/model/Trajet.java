@@ -18,11 +18,11 @@ public class Trajet {
     @Column(name = "id_trajet", nullable = false)
     private Integer id;
 
-    @Column(name = "distance_km", precision = 10, scale = 2)
+    @Column(name = "distance_km", nullable = false, precision = 15, scale = 2)
     private BigDecimal distanceKm;
 
-    @Column(name = "duree_estimee_minutes")
-    private Integer dureeEstimeeMinutes;
+    @Column(name = "duree_estimee_minutes", precision = 15, scale = 2)
+    private BigDecimal dureeEstimeeMinutes;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_gare_arrivee", nullable = false)

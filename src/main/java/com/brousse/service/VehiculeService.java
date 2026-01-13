@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,20 +15,23 @@ import java.util.Optional;
 @Service
 public class VehiculeService {
     private final VehiculeRepository vehiculeRepository;
-    private final PlaceVehiculeRepository placeVehiculeRepository;
+    private final CategorieRepository categorieRepository;
+    private final VehiculeModeleRepository vehiculeModeleRepository;
     private final VehiculesStatutRepository vehiculesStatutRepository;
     private final StatutVehiculeRepository statutVehiculeRepository;
     private final MaintenanceVehiculeRepository maintenanceVehiculeRepository;
 
     public VehiculeService(
             VehiculeRepository vehiculeRepository,
-            PlaceVehiculeRepository placeVehiculeRepository,
+            CategorieRepository categorieRepository,
+            VehiculeModeleRepository vehiculeModeleRepository,
             VehiculesStatutRepository vehiculesStatutRepository,
             StatutVehiculeRepository statutVehiculeRepository,
             MaintenanceVehiculeRepository maintenanceVehiculeRepository
     ) {
         this.vehiculeRepository = vehiculeRepository;
-        this.placeVehiculeRepository = placeVehiculeRepository;
+        this.categorieRepository = categorieRepository;
+        this.vehiculeModeleRepository = vehiculeModeleRepository;
         this.vehiculesStatutRepository = vehiculesStatutRepository;
         this.statutVehiculeRepository = statutVehiculeRepository;
         this.maintenanceVehiculeRepository = maintenanceVehiculeRepository;
@@ -59,23 +62,24 @@ public class VehiculeService {
 
     // Création d'un véhicule avec statut initial "disponible" et association à une configuration de places existante
     @Transactional
-    public Vehicule createVehicule(String immatriculation, String modele, Integer placeVehiculeId) {
+    public Vehicule createVehicule(String immatriculation, BigDecimal consommation, Integer categorieId, Integer vehiculeModeleId) {
         if (immatriculation == null || immatriculation.isBlank()) {
             throw new IllegalArgumentException("Immatriculation obligatoire");
         }
-        if (modele == null || modele.isBlank()) {
-            throw new IllegalArgumentException("Modèle obligatoire");
+        if (consommation == null) {
+            throw new IllegalArgumentException("Consommation obligatoire");
         }
-        PlaceVehicule pv = placeVehiculeRepository.findById(placeVehiculeId)
-                .orElseThrow(() -> new IllegalArgumentException("PlaceVehicule introuvable: " + placeVehiculeId));
+        Categorie categorie = categorieRepository.findById(categorieId)
+                .orElseThrow(() -> new IllegalArgumentException("Categorie introuvable: " + categorieId));
+        VehiculeModele vehiculeModele = vehiculeModeleRepository.findById(vehiculeModeleId)
+                .orElseThrow(() -> new IllegalArgumentException("VehiculeModele introuvable: " + vehiculeModeleId));
 
         Vehicule v = new Vehicule();
         v.setImmatriculation(immatriculation);
-        v.setModele(modele);
-        v.setPlaceVehicule(pv);
+        v.setConsommationL100km(consommation);
+        v.setCategorie(categorie);
+        v.setVehiculeModele(vehiculeModele);
         Vehicule saved = vehiculeRepository.save(v);
-
-        // Pas de création automatique des places: elles sont déjà configurées via place_vehicule.nb_place
 
         // Historiser le statut initial
         historiserStatut(saved, 1);
@@ -91,15 +95,20 @@ public class VehiculeService {
     }
 
     @Transactional
-    public Vehicule updateVehicule(Integer id, String immatriculation, String modele, Integer placeVehiculeId) {
+    public Vehicule updateVehicule(Integer id, String immatriculation, BigDecimal consommation, Integer categorieId, Integer vehiculeModeleId) {
         Vehicule v = vehiculeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicule introuvable: " + id));
         if (immatriculation != null && !immatriculation.isBlank()) v.setImmatriculation(immatriculation);
-        if (modele != null && !modele.isBlank()) v.setModele(modele);
-        if (placeVehiculeId != null) {
-            PlaceVehicule pv = placeVehiculeRepository.findById(placeVehiculeId)
-                    .orElseThrow(() -> new IllegalArgumentException("PlaceVehicule introuvable: " + placeVehiculeId));
-            v.setPlaceVehicule(pv);
+        if (consommation != null) v.setConsommationL100km(consommation);
+        if (categorieId != null) {
+            Categorie categorie = categorieRepository.findById(categorieId)
+                    .orElseThrow(() -> new IllegalArgumentException("Categorie introuvable: " + categorieId));
+            v.setCategorie(categorie);
+        }
+        if (vehiculeModeleId != null) {
+            VehiculeModele vehiculeModele = vehiculeModeleRepository.findById(vehiculeModeleId)
+                    .orElseThrow(() -> new IllegalArgumentException("VehiculeModele introuvable: " + vehiculeModeleId));
+            v.setVehiculeModele(vehiculeModele);
         }
         return vehiculeRepository.save(v);
     }
@@ -111,7 +120,7 @@ public class VehiculeService {
 
     // Statut: maintenance
     @Transactional
-    public Vehicule mettreEnMaintenance(Integer id, LocalDate dateMaintenance, String description, BigDecimal cout) {
+    public Vehicule mettreEnMaintenance(Integer id, Instant dateMaintenance, String description, BigDecimal cout) {
         Vehicule v = vehiculeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicule introuvable: " + id));
         Vehicule saved = vehiculeRepository.save(v);
@@ -119,7 +128,7 @@ public class VehiculeService {
         // Enregistrer maintenance
         MaintenanceVehicule m = new MaintenanceVehicule();
         m.setVehicule(saved);
-        m.setDateMaintenance(dateMaintenance != null ? dateMaintenance : LocalDate.now());
+        m.setDateMaintenance(dateMaintenance != null ? dateMaintenance : Instant.now());
         m.setDescription(description);
         m.setCout(cout);
         maintenanceVehiculeRepository.save(m);
@@ -158,35 +167,13 @@ public class VehiculeService {
     }
 
     // Utilitaires
-    private void historiserStatut(Vehicule vehicule, String libelleStatut) {
-        VehiculesStatut vs = vehiculesStatutRepository.findByLibelle(libelleStatut)
-                .orElseGet(() -> {
-                    VehiculesStatut created = new VehiculesStatut();
-                    created.setLibelle(libelleStatut);
-                    return vehiculesStatutRepository.save(created);
-                });
-        StatutVehicule sv = new StatutVehicule();
-        StatutVehiculeId svId = new StatutVehiculeId();
-        svId.setIdVehicule(vehicule.getId());
-        svId.setIdVehiculesStatut(vs.getId());
-        sv.setId(svId);
-        sv.setVehicule(vehicule);
-        sv.setVehiculesStatut(vs);
-        sv.setDateStatut(LocalDate.now().toString());
-        statutVehiculeRepository.save(sv);
-    }
-
     public void historiserStatut(Vehicule vehicule, Integer idStatut) {
-        VehiculesStatut vs = vehiculesStatutRepository.findById(idStatut)
-                .orElseThrow(() -> new IllegalArgumentException("VehiculesStatut introuvable: " + idStatut));
+        VehiculeStatut vs = vehiculesStatutRepository.findById(idStatut)
+                .orElseThrow(() -> new IllegalArgumentException("VehiculeStatut introuvable: " + idStatut));
         StatutVehicule sv = new StatutVehicule();
-        StatutVehiculeId svId = new StatutVehiculeId();
-        svId.setIdVehicule(vehicule.getId());
-        svId.setIdVehiculesStatut(vs.getId());
-        sv.setId(svId);
         sv.setVehicule(vehicule);
-        sv.setVehiculesStatut(vs);
-        sv.setDateStatut(LocalDate.now().toString());
+        sv.setVehiculeStatut(vs);
+        sv.setDateStatut(java.time.LocalDate.now());
         statutVehiculeRepository.save(sv);
     }
 
@@ -195,7 +182,6 @@ public class VehiculeService {
         if (statuts.isEmpty()) {
             return null;
         }
-        Integer statusId = statuts.get(0).getId().getIdVehiculesStatut();
-        return vehiculesStatutRepository.findById(statusId).map(VehiculesStatut::getLibelle).orElse(null);
+        return statuts.get(0).getVehiculeStatut().getLibelle();
     }
 }

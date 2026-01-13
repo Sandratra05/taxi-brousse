@@ -39,29 +39,25 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Code Billet</th>
                     <th>Client</th>
-                    <th>Voyage</th>
-                    <th>Statut</th>
+                    <th>Nombre de billets</th>
                     <th>Montant Total</th>
+                    <th>Statut</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="b : ${billets}">
-                    <td th:text="${b.id}"></td>
-                    <td><strong th:text="${b.codeBillet}"></strong></td>
-                    <td th:text="${b.client.nom + ' ' + b.client.prenom}"></td>
-                    <td th:text="${b.voyage.trajet.gareDepart.nom + ' → ' + b.voyage.trajet.gareArrivee.nom}"></td>
+                <tr th:each="info : ${commandesInfo}">
+                    <td th:text="${info.commande.client.nom + ' ' + info.commande.client.prenom}"></td>
+                    <td th:text="${info.nombreBillets}"></td>
+                    <td><strong th:text="${#numbers.formatDecimal(info.montantTotal, 0, 'COMMA', 0, 'POINT') + ' Ar'}"></strong></td>
                     <td>
-                        <span th:if="${b.statut == 'Payé'}" class="status-paye" th:text="${b.statut}"></span>
-                        <span th:if="${b.statut == 'Non Payé'}" class="status-non-paye" th:text="${b.statut}"></span>
+                        <span th:if="${info.tousPayes}" class="status-paye">Payé</span>
+                        <span th:if="${!info.tousPayes}" class="status-non-paye">Non Payé</span>
                     </td>
-                    <td><strong th:text="${#numbers.formatDecimal(b.montantTotal, 0, 'COMMA', 0, 'POINT') + ' Ar'}"></strong></td>
                     <td>
-                        <a th:href="@{'/billets/' + ${b.id}}"><i class="fas fa-eye"></i> Détail</a>
-                        <a th:if="${b.statut == 'Non Payé'}" th:href="@{'/billets/formPayer/' + ${b.id}}" class="btn-success"><i class="fas fa-credit-card"></i> Payer</a>
+                        <a th:href="@{'/billets/commande/' + ${info.commande.id}}"><i class="fas fa-eye"></i> Détail</a>
+                        <a th:if="${!info.tousPayes}" th:href="@{'/billets/commande/' + ${info.commande.id} + '/payer'}" class="btn-success"><i class="fas fa-credit-card"></i> Payer</a>
                     </td>
                 </tr>
             </tbody>

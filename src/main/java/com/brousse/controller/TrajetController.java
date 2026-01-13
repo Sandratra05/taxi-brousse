@@ -129,7 +129,6 @@ public class TrajetController {
             @RequestParam BigDecimal distance,
             @RequestParam Integer duree,
             @RequestParam(required = false) BigDecimal prixBase,
-            @RequestParam(required = false) BigDecimal prixBagage,
             Model model
     ) {
         boolean hasError = false;
@@ -158,10 +157,6 @@ public class TrajetController {
             model.addAttribute("prixBaseError", "Le prix de base ne peut pas être négatif");
             hasError = true;
         }
-        if (prixBagage != null && prixBagage.compareTo(BigDecimal.ZERO) < 0) {
-            model.addAttribute("prixBagageError", "Le prix bagage ne peut pas être négatif");
-            hasError = true;
-        }
 
         if (hasError) {
             model.addAttribute("gares", gareRepository.findAll());
@@ -170,7 +165,6 @@ public class TrajetController {
             model.addAttribute("distance", distance);
             model.addAttribute("duree", duree);
             model.addAttribute("prixBase", prixBase);
-            model.addAttribute("prixBagage", prixBagage);
             return "trajets/create";
         }
         
@@ -178,13 +172,13 @@ public class TrajetController {
         trajet.setGareDepart(gareRepository.findById(gareDepartId).orElse(null));
         trajet.setGareArrivee(gareRepository.findById(gareArriveeId).orElse(null));
         trajet.setDistanceKm(distance);
-        trajet.setDureeEstimeeMinutes(duree);
-        
+        trajet.setDureeEstimeeMinutes(BigDecimal.valueOf(duree));
+
         Trajet saved = trajetService.create(trajet);
 
         // Créer le tarif si les prix sont fournis
         if (prixBase != null) {
-            trajetService.createOrUpdateTarif(saved, prixBase, prixBagage);
+            trajetService.createOrUpdateTarif(saved, prixBase);
         }
 
         return "redirect:/trajets/" + saved.getId();
@@ -207,8 +201,7 @@ public class TrajetController {
         // Charger le tarif existant
         var tarif = trajetService.getTarifForTrajet(id);
         if (tarif != null) {
-            model.addAttribute("prixBase", tarif.getPrixBase());
-            model.addAttribute("prixBagage", tarif.getPrixBagage());
+            model.addAttribute("prixBase", tarif.getTarif());
         }
 
         return "trajets/edit";
@@ -223,7 +216,6 @@ public class TrajetController {
             @RequestParam BigDecimal distance,
             @RequestParam Integer duree,
             @RequestParam(required = false) BigDecimal prixBase,
-            @RequestParam(required = false) BigDecimal prixBagage,
             Model model
     ) {
         boolean hasError = false;
@@ -252,10 +244,6 @@ public class TrajetController {
             model.addAttribute("prixBaseError", "Le prix de base ne peut pas être négatif");
             hasError = true;
         }
-        if (prixBagage != null && prixBagage.compareTo(BigDecimal.ZERO) < 0) {
-            model.addAttribute("prixBagageError", "Le prix bagage ne peut pas être négatif");
-            hasError = true;
-        }
 
         if (hasError) {
             model.addAttribute("trajetId", id);
@@ -265,7 +253,6 @@ public class TrajetController {
             model.addAttribute("distance", distance);
             model.addAttribute("duree", duree);
             model.addAttribute("prixBase", prixBase);
-            model.addAttribute("prixBagage", prixBagage);
             return "trajets/edit";
         }
         
@@ -273,13 +260,13 @@ public class TrajetController {
         trajetDetails.setGareDepart(gareRepository.findById(gareDepartId).orElse(null));
         trajetDetails.setGareArrivee(gareRepository.findById(gareArriveeId).orElse(null));
         trajetDetails.setDistanceKm(distance);
-        trajetDetails.setDureeEstimeeMinutes(duree);
-        
+        trajetDetails.setDureeEstimeeMinutes(BigDecimal.valueOf(duree));
+
         Trajet updated = trajetService.update(id, trajetDetails);
 
         // Créer ou mettre à jour le tarif si les prix sont fournis
         if (prixBase != null) {
-            trajetService.createOrUpdateTarif(updated, prixBase, prixBagage);
+            trajetService.createOrUpdateTarif(updated, prixBase);
         }
 
         return "redirect:/trajets/" + id;

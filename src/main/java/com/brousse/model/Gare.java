@@ -14,14 +14,17 @@ public class Gare {
     @Column(name = "id_gare", nullable = false)
     private Integer id;
 
-    @Column(name = "nom", nullable = false, length = 100)
+    @Column(name = "nom", nullable = false, length = 50)
     private String nom;
 
-    @Column(name = "adresse", length = Integer.MAX_VALUE)
+    @Column(name = "adresse", length = 50)
     private String adresse;
 
-    @Column(name = "ville", length = 100)
-    private String ville;
+    @Column(name = "active", nullable = false)
+    private Boolean active;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_ville", nullable = false)
+    private Ville ville;
 
 }

@@ -14,13 +14,13 @@ public class Client {
     @Column(name = "id_client", nullable = false)
     private Integer id;
 
-    @Column(name = "nom", length = 50)
+    @Column(name = "nom", nullable = false, length = 50)
     private String nom;
 
-    @Column(name = "prenom", length = 50)
+    @Column(name = "prenom", nullable = false, length = 50)
     private String prenom;
 
-    @Column(name = "telephone", length = 50)
+    @Column(name = "telephone", nullable = false, length = 50)
     private String telephone;
 
     @Column(name = "email", length = 50)

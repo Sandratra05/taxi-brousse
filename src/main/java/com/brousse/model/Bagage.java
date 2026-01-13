@@ -19,11 +19,9 @@ public class Bagage {
     @Column(name = "nombre_sacs")
     private Integer nombreSacs;
 
-    @Column(name = "poids_total", precision = 6, scale = 2)
+    @Column(name = "poids_total", nullable = false, precision = 15, scale = 2)
     private BigDecimal poidsTotal;
 
-    @Column(name = "cout", precision = 10, scale = 2)
-    private BigDecimal cout;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_billet", nullable = false)

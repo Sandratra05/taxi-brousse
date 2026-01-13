@@ -3,7 +3,6 @@ package com.brousse.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -17,27 +16,22 @@ public class Billet {
     @Column(name = "id_billet", nullable = false)
     private Integer id;
 
-    @Column(name = "montant_total", nullable = false, precision = 10, scale = 2)
-    private BigDecimal montantTotal;
-
-    @ColumnDefault("'Non Payé'")
-    @Column(name = "statut", length = 50)
-    private String statut;
-
-    @Column(name = "code_billet", length = 100)
+    @Column(name = "code_billet", nullable = false, length = 50)
     private String codeBillet;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_place", nullable = false)
-    private Place place;
+    @Column(name = "montant_total", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montantTotal;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_client", nullable = false)
-    private Client client;
+    @Column(name = "statut", length = 50)
+    private String statut;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_voyage", nullable = false)
     private Voyage voyage;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_place", nullable = false)
+    private Place place;
 
 
 }

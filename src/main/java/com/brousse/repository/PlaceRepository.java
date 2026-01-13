@@ -12,5 +12,5 @@ public interface PlaceRepository extends JpaRepository<Place, Integer> {
     /**
      * Récupère toutes les places d'une configuration de véhicule
      */
-    List<Place> findByPlaceVehicule_Id(Integer idPlaceVehicule);
+    List<Place> findByVehicule_Id(Integer idVehicule);
 }

@@ -11,14 +11,16 @@
 
         <div class="detail-card">
             <p><strong>Immatriculation:</strong> <span th:text="${vehicule.immatriculation}"></span></p>
-            <p><strong>Modèle:</strong> <span th:text="${vehicule.modele}"></span></p>
+            <p><strong>Consommation (L/100km):</strong> <span th:text="${vehicule.consommationL100km}"></span></p>
+            <p><strong>Catégorie:</strong> <span th:text="${vehicule.categorie.code + ' - ' + vehicule.categorie.nom}"></span></p>
+            <p><strong>Modèle:</strong> <span th:text="${vehicule.vehiculeModele.marque + ' ' + vehicule.vehiculeModele.modele}"></span></p>
+            <p><strong>Nombre de places:</strong> <span th:text="${vehicule.vehiculeModele.place}"></span></p>
             <p><strong>Statut:</strong>
                 <span th:if="${statut == 'Actif'}" class="status-actif" th:text="${statut}"></span>
                 <span th:if="${statut == 'Maintenance'}" class="status-maintenance" th:text="${statut}"></span>
                 <span th:if="${statut == 'Hors service'}" class="status-hors-service" th:text="${statut}"></span>
                 <span th:if="${statut != 'Actif' && statut != 'Maintenance' && statut != 'Hors service'}" class="status-neutral" th:text="${statut}"></span>
             </p>
-            <p><strong>Places:</strong> <span th:text="${vehicule.placeVehicule.nbPlace}"></span></p>
         </div>
 
         <h2><i class="fas fa-tools"></i> Actions</h2>

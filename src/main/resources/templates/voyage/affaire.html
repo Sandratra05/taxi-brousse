@@ -71,7 +71,7 @@
                 <td th:text="${item.trajet}"></td>
                 <td th:text="${item.chauffeur}"></td>
                 <td th:text="${item.vehicule}"></td>
-                <td th:text="${item.chiffreAffaire} + ' Ar'"></td>
+                <td th:text="${#numbers.formatDecimal(item.chiffreAffaire, 0, 2)} + ' Ar'"></td>
             </tr>
             <tr th:if="${#lists.isEmpty(voyages)}">
                 <td colspan="5">Aucun voyage.</td>

@@ -64,7 +64,7 @@
                 <option th:each="v : ${vehicules}"
                         th:value="${v.id}"
                         th:selected="${mode == 'edit' and voyage.vehicule != null and v.id == voyage.vehicule.id}"
-                        th:text="${v.immatriculation + ' - ' + (v.modele != null ? v.modele : '')}">
+                        th:text="${v.immatriculation + ' - ' + (v.vehiculeModele.modele != null ? v.vehiculeModele.modele : '')}">
                 </option>
             </select>
         </label>

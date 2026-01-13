@@ -19,12 +19,10 @@ public interface TrajetRepository extends JpaRepository<Trajet, Integer>, JpaSpe
                     t.id_gare_arrivee,
                     t.distance_km,
                     t.duree_estimee_minutes,
-                    SUM(b.montant_total * pv.nb_place) AS chiffreAffaire
+                    SUM(b.montant_total) AS chiffreAffaire
                 FROM trajet t
                 JOIN voyage vo ON t.id_trajet = vo.id_trajet
-                JOIN vehicule v ON vo.id_vehicule = v.id_vehicule
                 JOIN billet b ON vo.id_voyage = b.id_voyage
-                JOIN place_vehicule pv ON v.id_place_vehicule = pv.id_place_vehicule
                 GROUP BY
                     t.id_trajet,
                     t.id_gare_depart,

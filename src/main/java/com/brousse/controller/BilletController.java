@@ -3,11 +3,15 @@ package com.brousse.controller;
 import com.brousse.model.Billet;
 import com.brousse.model.Voyage;
 import com.brousse.model.Place;
-import com.brousse.model.Vehicule;
+import com.brousse.model.Commande;
+import com.brousse.model.DetailsCommande;
+import com.brousse.model.Client;
 import com.brousse.repository.ClientRepository;
 import com.brousse.repository.VoyageRepository;
 import com.brousse.repository.PlaceRepository;
 import com.brousse.repository.MethodePaiementRepository;
+import com.brousse.repository.CommandeRepository;
+import com.brousse.repository.DetailsCommandeRepository;
 import com.brousse.service.BilletService;
 import com.brousse.service.PlaceService;
 import com.brousse.service.VoyageService;
@@ -43,35 +47,58 @@ public class BilletController {
     @Autowired
     private VoyageService voyageService;
 
+    @Autowired
+    private CommandeRepository commandeRepository;
+
+    @Autowired
+    private DetailsCommandeRepository detailsCommandeRepository;
+
     @GetMapping("/list")
     public String list(
             @RequestParam(required = false) String statut,
             @RequestParam(required = false) Integer idVoyage,
             Model model
     ) {
-        List<Billet> billets = new ArrayList<>();
+        // Récupérer toutes les commandes
+        List<Commande> commandes = commandeRepository.findAll();
+
+        // Filtrer par voyage si spécifié
+        if (idVoyage != null) {
+            commandes = commandes.stream()
+                    .filter(c -> {
+                        List<DetailsCommande> details = detailsCommandeRepository.findByCommande_Id(c.getId());
+                        return details.stream().anyMatch(d -> d.getBillet().getVoyage().getId().equals(idVoyage));
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        // Créer une liste d'informations de commandes
+        List<Map<String, Object>> commandesInfo = new ArrayList<>();
+        for (Commande commande : commandes) {
+            List<DetailsCommande> details = detailsCommandeRepository.findByCommande_Id(commande.getId());
+
+            Map<String, Object> info = new HashMap<>();
+            info.put("commande", commande);
+            info.put("details", details);
+            info.put("nombreBillets", details.size());
+            info.put("montantTotal", commande.getMontantTotal());
+
+            // Vérifier si tous les billets sont payés
+            boolean tousPayes = details.stream().allMatch(d -> "Payé".equals(d.getBillet().getStatut()));
+            info.put("tousPayes", tousPayes);
+
+            // Filtrer par statut si spécifié
+            if (statut != null && !statut.isBlank()) {
+                if ("Payé".equals(statut) && !tousPayes) continue;
+                if ("Non Payé".equals(statut) && tousPayes) continue;
+            }
+
+            commandesInfo.add(info);
+        }
 
         List<Voyage> voyages = voyageService.listerVoyagesPrevus();
 
-        for (Voyage v : voyages) {
-            List<Billet> billetsDuVoyage = billetService.getBilletsByVoyage(v.getId());
-            billets.addAll(billetsDuVoyage);
-        }
-
-        // Filter in memory
-        if (statut != null && !statut.isBlank()) {
-            billets = billets.stream()
-                    .filter(b -> statut.equals(b.getStatut()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        if (idVoyage != null) {
-            billets = billets.stream()
-                    .filter(b -> idVoyage.equals(b.getVoyage().getId()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        model.addAttribute("billets", billets);
+        model.addAttribute("commandesInfo", commandesInfo);
         model.addAttribute("voyages", voyages);
         model.addAttribute("statut", statut);
         model.addAttribute("idVoyage", idVoyage);
@@ -81,92 +108,105 @@ public class BilletController {
     /**
      * Affiche les places d'un voyage avec leur disponibilité
      */
-    @GetMapping("/voyage/{idVoyage}/places")
-    public String voirPlacesVoyage(@PathVariable Integer idVoyage, Model model) {
+//    @GetMapping("/voyage/{idVoyage}/places")
+//    public String voirPlacesVoyage(@PathVariable Integer idVoyage, Model model) {
+//        Voyage voyage = voyageRepository.findById(idVoyage)
+//                .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
+//
+//        // Récupérer toutes les places de la configuration du véhicule
+//        List<Place> toutesLesPlaces = placeService.getPlacesByVehicule(voyage.getVehicule().getId());
+//
+//        // Créer une map des places avec leurs infos
+//        List<Map<String, Object>> placesInfo = new ArrayList<>();
+//
+//        for (Place place : toutesLesPlaces) {
+//            Map<String, Object> info = new HashMap<>();
+//            info.put("place", place);
+//
+//            boolean disponible = placeService.isPlaceDisponible(place.getId(), idVoyage);
+//            info.put("disponible", disponible);
+//
+//            if (!disponible) {
+//                // Récupérer le billet associé
+//                Optional<Billet> billet = billetService.getBilletByPlaceAndVoyage(place.getId(), idVoyage);
+//                billet.ifPresent(b -> {
+//                    info.put("billet", b);
+//                });
+//            }
+//
+//            placesInfo.add(info);
+//        }
+//
+//        model.addAttribute("voyage", voyage);
+//        model.addAttribute("placesInfo", placesInfo);
+//
+//        return "billets/places-voyage";
+//    }
+
+    /**
+     * Formulaire d'achat de billets avec sélection visuelle des places
+     */
+    @GetMapping("/voyage/{idVoyage}/acheter")
+    public String showAcheterForm(
+            @PathVariable Integer idVoyage,
+            Model model
+    ) {
         Voyage voyage = voyageRepository.findById(idVoyage)
                 .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
 
         // Récupérer toutes les places de la configuration du véhicule
-        Integer idPlaceVehicule = voyage.getVehicule().getPlaceVehicule().getId();
-        List<Place> toutesLesPlaces = placeService.getPlacesByPlaceVehicule(idPlaceVehicule);
-        
+        List<Place> toutesLesPlaces = placeService.getPlacesByVehicule(voyage.getVehicule().getId());
+
         // Créer une map des places avec leurs infos
         List<Map<String, Object>> placesInfo = new ArrayList<>();
-        
+
         for (Place place : toutesLesPlaces) {
             Map<String, Object> info = new HashMap<>();
             info.put("place", place);
-            
+
             boolean disponible = placeService.isPlaceDisponible(place.getId(), idVoyage);
             info.put("disponible", disponible);
-            
+
             if (!disponible) {
                 // Récupérer le billet associé
                 Optional<Billet> billet = billetService.getBilletByPlaceAndVoyage(place.getId(), idVoyage);
                 billet.ifPresent(b -> {
-                    info.put("client", b.getClient());
                     info.put("billet", b);
                 });
             }
-            
+
             placesInfo.add(info);
         }
         
         model.addAttribute("voyage", voyage);
         model.addAttribute("placesInfo", placesInfo);
-        
-        return "billets/places-voyage";
-    }
-
-    /**
-     * Formulaire d'achat de billet
-     */
-    @GetMapping("/voyage/{idVoyage}/place/{idPlace}/acheter")
-    public String showAcheterForm(
-            @PathVariable Integer idVoyage,
-            @PathVariable Integer idPlace,
-            Model model
-    ) {
-        // Vérifier la disponibilité
-        if (!placeService.isPlaceDisponible(idPlace, idVoyage)) {
-            model.addAttribute("error", "Cette place n'est plus disponible");
-            return "redirect:/billets/voyage/" + idVoyage + "/places";
-        }
-        
-        Voyage voyage = voyageRepository.findById(idVoyage).orElse(null);
-        Place place = placeRepository.findById(idPlace).orElse(null);
-        
-        if (voyage == null || place == null) {
-            return "redirect:/voyages";
-        }
-        
-        model.addAttribute("voyage", voyage);
-        model.addAttribute("place", place);
         model.addAttribute("clients", clientRepository.findAll());
         
         return "billets/acheter-form";
     }
 
     /**
-     * Traitement de l'achat de billet
+     * Traitement de l'achat de billets multiples
      */
-    @PostMapping("/voyage/{idVoyage}/place/{idPlace}/acheter")
-    public String acheterBillet(
+    @PostMapping("/voyage/{idVoyage}/acheter")
+    public String acheterBillets(
             @PathVariable Integer idVoyage,
-            @PathVariable Integer idPlace,
+            @RequestParam(value = "placesIds", required = false) List<Integer> placesIds,
             @RequestParam Integer clientId,
             Model model
     ) {
         try {
-            Billet billet = billetService.acheterBillet(idVoyage, idPlace, clientId);
-            return "redirect:/billets/" + billet.getId();
+            if (placesIds == null || placesIds.isEmpty()) {
+                throw new IllegalArgumentException("Veuillez sélectionner au moins une place");
+            }
+
+            // Créer une commande pour tous les billets
+            Integer commandeId = billetService.acheterBilletsEnCommande(idVoyage, placesIds, clientId);
+
+            return "redirect:/billets/commande/" + commandeId;
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("voyage", voyageRepository.findById(idVoyage).orElse(null));
-            model.addAttribute("place", placeRepository.findById(idPlace).orElse(null));
-            model.addAttribute("clients", clientRepository.findAll());
-            model.addAttribute("clientId", clientId);
-            return "billets/acheter-form";
+            return showAcheterForm(idVoyage, model);
         }
     }
 
@@ -216,5 +256,61 @@ public class BilletController {
         model.addAttribute("voyages", voyagesPrevues);
         return "billets/form-voyage";
     }
-}
 
+    /**
+     * Afficher les détails d'une commande
+     */
+    @GetMapping("/commande/{id}")
+    public String detailCommande(@PathVariable Integer id, @RequestParam(required = false) String paiement, Model model) {
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Commande introuvable"));
+
+        List<DetailsCommande> detailsCommande = detailsCommandeRepository.findByCommande_Id(id);
+
+        // Vérifier si tous les billets sont payés
+        boolean tousPayes = detailsCommande.stream().allMatch(d -> "Payé".equals(d.getBillet().getStatut()));
+
+        model.addAttribute("commande", commande);
+        model.addAttribute("detailsCommande", detailsCommande);
+        model.addAttribute("paiementSuccess", "success".equals(paiement));
+        model.addAttribute("tousPayes", tousPayes);
+
+        return "billets/commande-detail";
+    }
+
+    /**
+     * Formulaire de paiement d'une commande
+     */
+    @GetMapping("/commande/{id}/payer")
+    public String showPayerCommandeForm(@PathVariable Integer id, Model model) {
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Commande introuvable"));
+
+        List<DetailsCommande> detailsCommande = detailsCommandeRepository.findByCommande_Id(id);
+
+        model.addAttribute("commande", commande);
+        model.addAttribute("detailsCommande", detailsCommande);
+        model.addAttribute("methodesPaiement", methodePaiementRepository.findAll());
+
+        return "billets/commande-payer";
+    }
+
+    /**
+     * Payer une commande
+     */
+    @PostMapping("/commande/{id}/payer")
+    public String payerCommande(@PathVariable Integer id, @RequestParam String datePaiement, @RequestParam Integer idMethodePaiement, Model model) {
+        try {
+            billetService.payerCommande(id, datePaiement, idMethodePaiement);
+            return "redirect:/billets/commande/" + id + "?paiement=success";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            Commande commande = commandeRepository.findById(id).orElse(null);
+            List<DetailsCommande> detailsCommande = detailsCommandeRepository.findByCommande_Id(id);
+            model.addAttribute("commande", commande);
+            model.addAttribute("detailsCommande", detailsCommande);
+            model.addAttribute("methodesPaiement", methodePaiementRepository.findAll());
+            return "billets/commande-payer";
+        }
+    }
+}

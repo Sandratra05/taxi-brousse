@@ -49,8 +49,7 @@
                     <th>Gare d'arrivée</th>
                     <th>Distance (km)</th>
                     <th>Durée (min)</th>
-                    <th>Prix base</th>
-                    <th>Prix bagage</th>
+                    <th>Tarif</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -63,12 +62,7 @@
                     <td th:text="${trajet.dureeEstimeeMinutes + ' min'}"></td>
                     <td>
                         <span th:if="${trajet.tarifs != null && !trajet.tarifs.isEmpty()}"
-                              th:text="${trajet.tarifs[0].prixBase + ' Ar'}"></span>
-                        <span th:if="${trajet.tarifs == null || trajet.tarifs.isEmpty()}" class="status-neutral">N/A</span>
-                    </td>
-                    <td>
-                        <span th:if="${trajet.tarifs != null && !trajet.tarifs.isEmpty()}"
-                              th:text="${trajet.tarifs[0].prixBagage + ' Ar'}"></span>
+                              th:text="${trajet.tarifs[0].tarif + ' Ar'}"></span>
                         <span th:if="${trajet.tarifs == null || trajet.tarifs.isEmpty()}" class="status-neutral">N/A</span>
                     </td>
                     <td>
@@ -80,7 +74,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(trajets)}">
-                    <td colspan="8" class="text-center"><i class="fas fa-info-circle"></i> Aucun trajet trouvé.</td>
+                    <td colspan="7" class="text-center"><i class="fas fa-info-circle"></i> Aucun trajet trouvé.</td>
                 </tr>
             </tbody>
         </table>

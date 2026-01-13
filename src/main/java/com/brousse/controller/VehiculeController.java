@@ -3,14 +3,15 @@ package com.brousse.controller;
 import com.brousse.model.MaintenanceVehicule;
 import com.brousse.model.StatutVehicule;
 import com.brousse.model.Vehicule;
-import com.brousse.model.PlaceVehicule;
+import com.brousse.repository.CategorieRepository;
+import com.brousse.repository.VehiculeModeleRepository;
 import com.brousse.service.VehiculeService;
-import com.brousse.repository.PlaceVehiculeRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -22,11 +23,13 @@ import java.util.Map;
 @RequestMapping("/vehicules")
 public class VehiculeController {
     private final VehiculeService vehiculeService;
-    private final PlaceVehiculeRepository placeVehiculeRepository;
+    private final CategorieRepository categorieRepository;
+    private final VehiculeModeleRepository vehiculeModeleRepository;
 
-    public VehiculeController(VehiculeService vehiculeService, PlaceVehiculeRepository placeVehiculeRepository) {
+    public VehiculeController(VehiculeService vehiculeService, CategorieRepository categorieRepository, VehiculeModeleRepository vehiculeModeleRepository) {
         this.vehiculeService = vehiculeService;
-        this.placeVehiculeRepository = placeVehiculeRepository;
+        this.categorieRepository = categorieRepository;
+        this.vehiculeModeleRepository = vehiculeModeleRepository;
     }
 
     // Liste des véhicules
@@ -66,8 +69,8 @@ public class VehiculeController {
     // Formulaire de création
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        List<PlaceVehicule> configs = placeVehiculeRepository.findAll();
-        model.addAttribute("placeVehiculeConfigs", configs);
+        model.addAttribute("categories", categorieRepository.findAll());
+        model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
         return "vehicules/create"; // templates/vehicules/create.html
     }
 
@@ -75,8 +78,9 @@ public class VehiculeController {
     @PostMapping
     public String create(
             @RequestParam String immatriculation,
-            @RequestParam String modele,
-            @RequestParam Integer placeVehiculeId,
+            @RequestParam BigDecimal consommation,
+            @RequestParam Integer categorieId,
+            @RequestParam Integer vehiculeModeleId,
             Model model
     ) {
         // Validations basiques
@@ -85,23 +89,29 @@ public class VehiculeController {
             model.addAttribute("immatriculationError", "Immatriculation obligatoire");
             hasError = true;
         }
-        if (modele == null || modele.isBlank()) {
-            model.addAttribute("modeleError", "Modèle obligatoire");
+        if (consommation == null) {
+            model.addAttribute("consommationError", "Consommation obligatoire");
             hasError = true;
         }
-        if (placeVehiculeId == null) {
-            model.addAttribute("placeVehiculeIdError", "Configuration de places obligatoire");
+        if (categorieId == null) {
+            model.addAttribute("categorieIdError", "Catégorie obligatoire");
+            hasError = true;
+        }
+        if (vehiculeModeleId == null) {
+            model.addAttribute("vehiculeModeleIdError", "Modèle obligatoire");
             hasError = true;
         }
         if (hasError) {
-            model.addAttribute("placeVehiculeConfigs", placeVehiculeRepository.findAll());
+            model.addAttribute("categories", categorieRepository.findAll());
+            model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
             // Repasser aussi les valeurs saisies pour ne pas vider le formulaire
             model.addAttribute("immatriculation", immatriculation);
-            model.addAttribute("modele", modele);
-            model.addAttribute("placeVehiculeId", placeVehiculeId);
+            model.addAttribute("consommation", consommation);
+            model.addAttribute("categorieId", categorieId);
+            model.addAttribute("vehiculeModeleId", vehiculeModeleId);
             return "vehicules/create";
         }
-        Vehicule v = vehiculeService.createVehicule(immatriculation, modele, placeVehiculeId);
+        Vehicule v = vehiculeService.createVehicule(immatriculation, consommation, categorieId, vehiculeModeleId);
         return "redirect:/vehicules/" + v.getId();
     }
 
@@ -114,9 +124,11 @@ public class VehiculeController {
         }
         model.addAttribute("vehiculeId", id);
         model.addAttribute("immatriculation", vehicule.getImmatriculation());
-        model.addAttribute("modele", vehicule.getModele());
-        model.addAttribute("placeVehiculeId", vehicule.getPlaceVehicule().getId());
-        model.addAttribute("placeVehiculeConfigs", placeVehiculeRepository.findAll());
+        model.addAttribute("consommation", vehicule.getConsommationL100km());
+        model.addAttribute("categorieId", vehicule.getCategorie().getId());
+        model.addAttribute("vehiculeModeleId", vehicule.getVehiculeModele().getId());
+        model.addAttribute("categories", categorieRepository.findAll());
+        model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
         return "vehicules/edit"; // templates/vehicules/edit.html
     }
 
@@ -125,8 +137,9 @@ public class VehiculeController {
     public String update(
             @PathVariable Integer id,
             @RequestParam(required = false) String immatriculation,
-            @RequestParam(required = false) String modele,
-            @RequestParam(required = false) Integer placeVehiculeId,
+            @RequestParam(required = false) BigDecimal consommation,
+            @RequestParam(required = false) Integer categorieId,
+            @RequestParam(required = false) Integer vehiculeModeleId,
             Model model
     ) {
         boolean hasError = false;
@@ -134,19 +147,17 @@ public class VehiculeController {
             model.addAttribute("immatriculationError", "Immatriculation obligatoire");
             hasError = true;
         }
-        if (modele != null && modele.isBlank()) {
-            model.addAttribute("modeleError", "Modèle obligatoire");
-            hasError = true;
-        }
         if (hasError) {
             model.addAttribute("vehiculeId", id);
             model.addAttribute("immatriculation", immatriculation);
-            model.addAttribute("modele", modele);
-            model.addAttribute("placeVehiculeId", placeVehiculeId);
-            model.addAttribute("placeVehiculeConfigs", placeVehiculeRepository.findAll());
+            model.addAttribute("consommation", consommation);
+            model.addAttribute("categorieId", categorieId);
+            model.addAttribute("vehiculeModeleId", vehiculeModeleId);
+            model.addAttribute("categories", categorieRepository.findAll());
+            model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
             return "vehicules/edit";
         }
-        vehiculeService.updateVehicule(id, immatriculation, modele, placeVehiculeId);
+        vehiculeService.updateVehicule(id, immatriculation, consommation, categorieId, vehiculeModeleId);
         return "redirect:/vehicules/" + id;
     }
 
@@ -165,17 +176,20 @@ public class VehiculeController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) BigDecimal cout
     ) {
-        LocalDate date = null;
+        Instant date = null;
         if (dateMaintenance != null && !dateMaintenance.isBlank()) {
             try {
-                date = LocalDate.parse(dateMaintenance);
+                LocalDate ld = LocalDate.parse(dateMaintenance);
+                date = ld.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant();
             } catch (DateTimeParseException e) {
-                // si invalide, on prend aujourd'hui
-                date = LocalDate.now();
+                // si invalide, on prend maintenant
+                date = Instant.now();
             }
+        } else {
+            date = Instant.now();
         }
         vehiculeService.mettreEnMaintenance(id,
-                date != null ? date : LocalDate.now(),
+                date,
                 description,
                 cout);
         return "redirect:/vehicules/" + id;

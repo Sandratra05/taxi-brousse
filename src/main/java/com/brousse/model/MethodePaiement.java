@@ -14,6 +14,6 @@ public class MethodePaiement {
     @Column(name = "id_methode_paiement", nullable = false)
     private Integer id;
 
-    @Column(name = "libelle", length = 50)
+    @Column(name = "libelle", nullable = false, length = 50)
     private String libelle;
 }
