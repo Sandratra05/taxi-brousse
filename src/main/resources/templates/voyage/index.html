@@ -106,7 +106,7 @@
                 <span th:if="${item.statut != 'Prévue' && item.statut != 'En cours' && item.statut != 'Terminé' && item.statut != 'Annulé'}" class="status-neutral" th:text="${item.statut}"></span>
             </td>
             <td>
-                <a th:if="${item.statut == 'Prévue'}" th:href="@{/billets/voyage/{id}/places(id=${item.voyage.id})}"><i class="fas fa-chair"></i> Voir places</a>
+                <a th:if="${item.statut == 'Prévue'}" th:href="@{/billets/voyage/{id}/acheter(id=${item.voyage.id})}"><i class="fas fa-chair"></i> Voir places</a>
                 <a th:if="${item.statut == 'Prévue' || item.statut == 'En cours'}"  th:href="@{|/voyages/${item.voyage.id}/edit|}"><i class="fas fa-edit"></i> Modifier</a>
                 <span th:if="${item.statut != 'Prévue' && item.statut != 'En cours'}" class="status-neutral">Aucune action</span>
             </td>
