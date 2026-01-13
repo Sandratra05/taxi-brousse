@@ -16,10 +16,12 @@ import com.brousse.service.BilletService;
 import com.brousse.service.PlaceService;
 import com.brousse.service.VoyageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.persistence.criteria.Predicate;
 import java.util.*;
 
 @Controller
@@ -59,18 +61,20 @@ public class BilletController {
             @RequestParam(required = false) Integer idVoyage,
             Model model
     ) {
-        // Récupérer toutes les commandes
-        List<Commande> commandes = commandeRepository.findAll();
+        // Construire la spécification pour filtrer en base de données
+        Specification<Commande> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (idVoyage != null) {
+                // Join avec DetailsCommande et Billet pour filtrer par voyage
+                var detailsJoin = root.join("detailsCommandes");
+                var billetJoin = detailsJoin.join("billet");
+                predicates.add(criteriaBuilder.equal(billetJoin.get("voyage").get("id"), idVoyage));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
 
-        // Filtrer par voyage si spécifié
-        if (idVoyage != null) {
-            commandes = commandes.stream()
-                    .filter(c -> {
-                        List<DetailsCommande> details = detailsCommandeRepository.findByCommande_Id(c.getId());
-                        return details.stream().anyMatch(d -> d.getBillet().getVoyage().getId().equals(idVoyage));
-                    })
-                    .collect(java.util.stream.Collectors.toList());
-        }
+        // Récupérer les commandes filtrées
+        List<Commande> commandes = commandeRepository.findAll(spec);
 
         // Créer une liste d'informations de commandes
         List<Map<String, Object>> commandesInfo = new ArrayList<>();
@@ -87,7 +91,7 @@ public class BilletController {
             boolean tousPayes = details.stream().allMatch(d -> "Payé".equals(d.getBillet().getStatut()));
             info.put("tousPayes", tousPayes);
 
-            // Filtrer par statut si spécifié
+            // Filtrer par statut si spécifié (gardé en mémoire car basé sur agrégat)
             if (statut != null && !statut.isBlank()) {
                 if ("Payé".equals(statut) && !tousPayes) continue;
                 if ("Non Payé".equals(statut) && tousPayes) continue;
