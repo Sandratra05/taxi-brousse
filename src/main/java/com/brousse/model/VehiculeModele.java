@@ -24,4 +24,7 @@ public class VehiculeModele {
 
     @Column(name = "marque", nullable = false, length = 50)
     private String marque;
+
+    @Column(name = "place", nullable = false)
+    private Integer place;
 }

@@ -38,7 +38,7 @@
                     <option value="">-- Choisir un modèle --</option>
                     <option th:each="modele : ${vehiculeModeles}"
                             th:value="${modele.id}"
-                            th:text="${modele.marque + ' ' + modele.modele}"
+                            th:text="${modele.marque + ' ' + modele.modele + ' (' + modele.place + ' places)'}"
                             th:selected="${vehiculeModeleId == modele.id}"></option>
                 </select>
             </label>

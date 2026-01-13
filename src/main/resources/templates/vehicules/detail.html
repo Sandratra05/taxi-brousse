@@ -14,6 +14,7 @@
             <p><strong>Consommation (L/100km):</strong> <span th:text="${vehicule.consommationL100km}"></span></p>
             <p><strong>Catégorie:</strong> <span th:text="${vehicule.categorie.code + ' - ' + vehicule.categorie.nom}"></span></p>
             <p><strong>Modèle:</strong> <span th:text="${vehicule.vehiculeModele.marque + ' ' + vehicule.vehiculeModele.modele}"></span></p>
+            <p><strong>Nombre de places:</strong> <span th:text="${vehicule.vehiculeModele.place}"></span></p>
             <p><strong>Statut:</strong>
                 <span th:if="${statut == 'Actif'}" class="status-actif" th:text="${statut}"></span>
                 <span th:if="${statut == 'Maintenance'}" class="status-maintenance" th:text="${statut}"></span>
