@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des chauffeurs</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div class="content">
+        <h1>Liste des chauffeurs</h1>
+        <a href="/chauffeurs/create"><i class="fas fa-plus"></i> Créer un nouveau chauffeur</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Téléphone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="chauffeur : ${chauffeurs}">
+                    <td th:text="${chauffeur.id}"></td>
+                    <td th:text="${chauffeur.nom}"></td>
+                    <td th:text="${chauffeur.prenom}"></td>
+                    <td th:text="${chauffeur.telephone}"></td>
+                    <td>
+                        <!-- Actions if needed -->
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(chauffeurs)}">
+                    <td colspan="5" class="text-center"><i class="fas fa-info-circle"></i> Aucun chauffeur trouvé.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
