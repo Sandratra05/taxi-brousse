@@ -128,7 +128,6 @@ public class TrajetController {
             @RequestParam Integer gareArriveeId,
             @RequestParam BigDecimal distance,
             @RequestParam Integer duree,
-            @RequestParam(required = false) BigDecimal prixBase,
             Model model
     ) {
         boolean hasError = false;
@@ -153,10 +152,7 @@ public class TrajetController {
             model.addAttribute("dureeError", "Durée obligatoire et doit être positive");
             hasError = true;
         }
-        if (prixBase != null && prixBase.compareTo(BigDecimal.ZERO) < 0) {
-            model.addAttribute("prixBaseError", "Le prix de base ne peut pas être négatif");
-            hasError = true;
-        }
+
 
         if (hasError) {
             model.addAttribute("gares", gareRepository.findAll());
@@ -164,7 +160,6 @@ public class TrajetController {
             model.addAttribute("gareArriveeId", gareArriveeId);
             model.addAttribute("distance", distance);
             model.addAttribute("duree", duree);
-            model.addAttribute("prixBase", prixBase);
             return "trajets/create";
         }
         
@@ -175,11 +170,6 @@ public class TrajetController {
         trajet.setDureeEstimeeMinutes(BigDecimal.valueOf(duree));
 
         Trajet saved = trajetService.create(trajet);
-
-        // Créer le tarif si les prix sont fournis
-        if (prixBase != null) {
-            trajetService.createOrUpdateTarif(saved, prixBase);
-        }
 
         return "redirect:/trajets/" + saved.getId();
     }
