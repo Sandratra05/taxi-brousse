@@ -13,6 +13,7 @@ import com.brousse.repository.TarifRepository;
 
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,6 +131,7 @@ public class TrajetService {
         }
 
         tarif.setTarif(prixBase);
+        tarif.setDateTarif(LocalDate.now());
 
         return tarifRepository.save(tarif);
     }

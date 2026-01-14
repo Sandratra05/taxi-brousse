@@ -46,13 +46,6 @@
 
             <hr/>
 
-            <h3><i class="fas fa-money-bill-wave"></i> Tarification</h3>
-
-            <label>Tarif (Ar):
-                <input type="number" step="0.01" name="prixBase" th:value="${prixBase}" placeholder="Ex: 25000"/>
-            </label>
-            <span th:if="${prixBaseError}" class="error-message" th:text="${prixBaseError}"></span>
-
             <div class="actions-buttons">
                 <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Créer</button>
                 <a href="/trajets" class="btn btn-secondary"><i class="fas fa-times"></i> Annuler</a>

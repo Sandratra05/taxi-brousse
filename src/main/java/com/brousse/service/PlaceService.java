@@ -30,9 +30,10 @@ public class PlaceService {
         if (idPlace == null || idVoyage == null) {
             return false;
         }
-        
+        boolean billetExiste = billetRepository.findByVoyage_Id(idVoyage).stream()
+                .anyMatch(billet -> billet.getPlace().getId().equals(idPlace));
         // Vérifier si un billet existe avec cette place ET ce voyage
-        boolean billetExiste = billetRepository.existsByPlace_IdAndVoyage_Id(idPlace, idVoyage);
+//        boolean billetExiste = billetRepository.existsByPlace_IdAndVoyage_Id(idPlace, idVoyage);
 
         // La place est disponible si AUCUN billet n'existe
         return !billetExiste;

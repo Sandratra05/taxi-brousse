@@ -10,6 +10,7 @@ import com.brousse.repository.VoyageStatutRepository;
 import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.VehiculeRepository;
 import com.brousse.repository.VehiculeStatutRepository;
+import com.brousse.service.BilletService;
 import com.brousse.service.VoyageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,23 +28,23 @@ import java.util.Map;
 @RequestMapping("/voyages")
 public class VoyageController {
 
-    @Autowired
-    private VoyageService voyageService;
+    private final VoyageService voyageService;
+    private final ChauffeurRepository chauffeurRepository;
+    private final VehiculeRepository vehiculeRepository;
+    private final TrajetRepository trajetRepository;
+    private final VoyageStatutRepository voyageStatutRepository;
+    private final VehiculeStatutRepository vehiculeStatutRepository;
+    private final BilletService billetService;
 
-    @Autowired
-    private ChauffeurRepository chauffeurRepository;
-
-    @Autowired
-    private VehiculeRepository vehiculeRepository;
-
-    @Autowired
-    private TrajetRepository trajetRepository;
-
-    @Autowired
-    private VoyageStatutRepository voyageStatutRepository;
-
-    @Autowired
-    private VehiculeStatutRepository vehiculeStatutRepository;
+    public VoyageController(VoyageService voyageService, ChauffeurRepository chauffeurRepository, VehiculeRepository vehiculeRepository, TrajetRepository trajetRepository, VoyageStatutRepository voyageStatutRepository, VehiculeStatutRepository vehiculeStatutRepository, BilletService billetService) {
+        this.voyageService = voyageService;
+        this.chauffeurRepository = chauffeurRepository;
+        this.vehiculeRepository = vehiculeRepository;
+        this.trajetRepository = trajetRepository;
+        this.voyageStatutRepository = voyageStatutRepository;
+        this.vehiculeStatutRepository = vehiculeStatutRepository;
+        this.billetService = billetService;
+    }
 
     // ----- Helpers -----
     private void chargerListesForm(Model model, Voyage voyageEnEdition) {
@@ -321,7 +322,8 @@ public class VoyageController {
         try {
             LocalDateTime ldt = parseDatetimeLocalToLdt(dateDepart);
 
-            voyageService.creerVoyage(ldt, idChauffeur, idVehicule, idTrajet, idVoyageStatut);
+            Voyage voyage = voyageService.creerVoyage(ldt, idChauffeur, idVehicule, idTrajet, idVoyageStatut);
+//            billetService.genererBillet(voyage.getId(), idVehicule);
 
             return "redirect:/voyages";
         } catch (Exception e) {
