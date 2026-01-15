@@ -3,7 +3,6 @@ package com.brousse.service;
 import com.brousse.model.Place;
 import com.brousse.repository.BilletRepository;
 import com.brousse.repository.PlaceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +11,14 @@ import java.util.Optional;
 @Service
 public class PlaceService {
     
-    @Autowired
-    private PlaceRepository placeRepository;
-    
-    @Autowired
-    private BilletRepository billetRepository;
+    private final PlaceRepository placeRepository;
+
+    private final BilletRepository billetRepository;
+
+    public PlaceService(PlaceRepository placeRepository, BilletRepository billetRepository) {
+        this.placeRepository = placeRepository;
+        this.billetRepository = billetRepository;
+    }
 
     /**
      * Vérifie si une place est disponible pour un voyage donné

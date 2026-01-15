@@ -27,31 +27,41 @@ import java.util.HashMap;
 @Transactional
 public class VoyageService {
 
-    @Autowired
-    private VoyageRepository voyageRepository;
+    private final VoyageRepository voyageRepository;
 
-    @Autowired
-    private ChauffeurRepository chauffeurRepository;
+    private final ChauffeurRepository chauffeurRepository;
 
-    @Autowired
-    private VehiculeRepository vehiculeRepository;
+    private final VehiculeRepository vehiculeRepository;
 
-    @Autowired
-    private TrajetRepository trajetRepository;
+    private final TrajetRepository trajetRepository;
 
-    @Autowired
-    private VoyageStatutRepository voyageStatutRepository;
+    private final VoyageStatutRepository voyageStatutRepository;
 
-    @Autowired
-    private StatutVoyageRepository statutVoyageRepository;
+    private final StatutVoyageRepository statutVoyageRepository;
 
-    @Autowired
-    private StatutVehiculeRepository statutVehiculeRepository;
+    private final StatutVehiculeRepository statutVehiculeRepository;
 
-    @Autowired
-    private VehiculeStatutRepository vehiculeStatutRepository;
+    private final VehiculeStatutRepository vehiculeStatutRepository;
 
     private static final Duration MARGE_TURNAROUND = Duration.ofMinutes(15);
+
+    public VoyageService(VoyageRepository voyageRepository,
+                         ChauffeurRepository chauffeurRepository,
+                         VehiculeRepository vehiculeRepository,
+                         TrajetRepository trajetRepository,
+                         VoyageStatutRepository voyageStatutRepository,
+                         StatutVoyageRepository statutVoyageRepository,
+                         StatutVehiculeRepository statutVehiculeRepository,
+                         VehiculeStatutRepository vehiculeStatutRepository) {
+        this.voyageRepository = voyageRepository;
+        this.chauffeurRepository = chauffeurRepository;
+        this.vehiculeRepository = vehiculeRepository;
+        this.trajetRepository = trajetRepository;
+        this.voyageStatutRepository = voyageStatutRepository;
+        this.statutVoyageRepository = statutVoyageRepository;
+        this.statutVehiculeRepository = statutVehiculeRepository;
+        this.vehiculeStatutRepository = vehiculeStatutRepository;
+    }
 
     public List<VoyageDTO> getVoyageChiffreAffaire() {
 

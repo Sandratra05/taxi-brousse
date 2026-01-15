@@ -17,47 +17,63 @@ import java.time.Instant;
 @Transactional
 public class BilletService {
     
-    @Autowired
-    private BilletRepository billetRepository;
-    
-    @Autowired
-    private PlaceRepository placeRepository;
-    
-    @Autowired
-    private ClientRepository clientRepository;
-    
-    @Autowired
-    private VoyageRepository voyageRepository;
+    private final BilletRepository billetRepository;
 
-    @Autowired
-    private TarifRepository tarifRepository;
-    
-    @Autowired
-    private PaiementRepository paiementRepository;
+    private final PlaceRepository placeRepository;
 
-    @Autowired
-    private StatutPaiementRepository statutPaiementRepository;
+    private final ClientRepository clientRepository;
 
-    @Autowired
-    private PaiementStatutRepository paiementStatutRepository;
+    private final VoyageRepository voyageRepository;
 
-    @Autowired
-    private MethodePaiementRepository methodePaiementRepository;
+    private final TarifRepository tarifRepository;
 
-    @Autowired
-    private PlaceService placeService;
+    private final PaiementRepository paiementRepository;
 
-    @Autowired
-    private CommandeRepository commandeRepository;
+    private final StatutPaiementRepository statutPaiementRepository;
 
-    @Autowired
-    private DetailsCommandeRepository detailsCommandeRepository;
+    private final PaiementStatutRepository paiementStatutRepository;
 
-    @Autowired
-    private VehiculeService vehiculeService;
+    private final MethodePaiementRepository methodePaiementRepository;
 
-    @Autowired
-    private PlaceTarifRepository placeTarifRepository;
+    private final PlaceService placeService;
+
+    private final CommandeRepository commandeRepository;
+
+    private final DetailsCommandeRepository detailsCommandeRepository;
+
+    private final VehiculeService vehiculeService;
+
+    private final PlaceTarifRepository placeTarifRepository;
+
+    public BilletService(BilletRepository billetRepository,
+                         PlaceRepository placeRepository,
+                         ClientRepository clientRepository,
+                         VoyageRepository voyageRepository,
+                         TarifRepository tarifRepository,
+                         PaiementRepository paiementRepository,
+                         StatutPaiementRepository statutPaiementRepository,
+                         PaiementStatutRepository paiementStatutRepository,
+                         MethodePaiementRepository methodePaiementRepository,
+                         PlaceService placeService,
+                         CommandeRepository commandeRepository,
+                         DetailsCommandeRepository detailsCommandeRepository,
+                         VehiculeService vehiculeService,
+                         PlaceTarifRepository placeTarifRepository) {
+        this.billetRepository = billetRepository;
+        this.placeRepository = placeRepository;
+        this.clientRepository = clientRepository;
+        this.voyageRepository = voyageRepository;
+        this.tarifRepository = tarifRepository;
+        this.paiementRepository = paiementRepository;
+        this.statutPaiementRepository = statutPaiementRepository;
+        this.paiementStatutRepository = paiementStatutRepository;
+        this.methodePaiementRepository = methodePaiementRepository;
+        this.placeService = placeService;
+        this.commandeRepository = commandeRepository;
+        this.detailsCommandeRepository = detailsCommandeRepository;
+        this.vehiculeService = vehiculeService;
+        this.placeTarifRepository = placeTarifRepository;
+    }
 
     /**
      * Récupère un billet par place et voyage

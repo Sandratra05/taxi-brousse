@@ -28,32 +28,43 @@ import java.util.*;
 @RequestMapping("/billets")
 public class BilletController {
     
-    @Autowired
-    private BilletService billetService;
-    
-    @Autowired
-    private PlaceService placeService;
-    
-    @Autowired
-    private VoyageRepository voyageRepository;
+    private final BilletService billetService;
 
-    @Autowired
-    private PlaceRepository placeRepository;
+    private final PlaceService placeService;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private final VoyageRepository voyageRepository;
 
-    @Autowired
-    private MethodePaiementRepository methodePaiementRepository;
+    private final PlaceRepository placeRepository;
 
-    @Autowired
-    private VoyageService voyageService;
+    private final ClientRepository clientRepository;
 
-    @Autowired
-    private CommandeRepository commandeRepository;
+    private final MethodePaiementRepository methodePaiementRepository;
 
-    @Autowired
-    private DetailsCommandeRepository detailsCommandeRepository;
+    private final VoyageService voyageService;
+
+    private final CommandeRepository commandeRepository;
+
+    private final DetailsCommandeRepository detailsCommandeRepository;
+
+    public BilletController(BilletService billetService,
+                            PlaceService placeService,
+                            VoyageRepository voyageRepository,
+                            PlaceRepository placeRepository,
+                            ClientRepository clientRepository,
+                            MethodePaiementRepository methodePaiementRepository,
+                            VoyageService voyageService,
+                            CommandeRepository commandeRepository,
+                            DetailsCommandeRepository detailsCommandeRepository) {
+        this.billetService = billetService;
+        this.placeService = placeService;
+        this.voyageRepository = voyageRepository;
+        this.placeRepository = placeRepository;
+        this.clientRepository = clientRepository;
+        this.methodePaiementRepository = methodePaiementRepository;
+        this.voyageService = voyageService;
+        this.commandeRepository = commandeRepository;
+        this.detailsCommandeRepository = detailsCommandeRepository;
+    }
 
     @GetMapping("/list")
     public String list(
