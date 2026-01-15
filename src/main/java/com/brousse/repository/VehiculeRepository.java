@@ -37,4 +37,5 @@ public interface VehiculeRepository extends JpaRepository<Vehicule, Integer>, Jp
         ORDER BY v.id_vehicule ASC;
     """, nativeQuery = true)
     List<Object[]> findChiffreAffaireParVehicule();
+
 }

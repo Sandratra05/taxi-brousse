@@ -21,6 +21,7 @@ public class VehiculeService {
     private final VehiculesStatutRepository vehiculesStatutRepository;
     private final StatutVehiculeRepository statutVehiculeRepository;
     private final MaintenanceVehiculeRepository maintenanceVehiculeRepository;
+    public final PlaceRepository placeRepository;
 
     public VehiculeService(
             VehiculeRepository vehiculeRepository,
@@ -28,7 +29,8 @@ public class VehiculeService {
             VehiculeModeleRepository vehiculeModeleRepository,
             VehiculesStatutRepository vehiculesStatutRepository,
             StatutVehiculeRepository statutVehiculeRepository,
-            MaintenanceVehiculeRepository maintenanceVehiculeRepository
+            MaintenanceVehiculeRepository maintenanceVehiculeRepository,
+            PlaceRepository placeRepository
     ) {
         this.vehiculeRepository = vehiculeRepository;
         this.categorieRepository = categorieRepository;
@@ -36,6 +38,7 @@ public class VehiculeService {
         this.vehiculesStatutRepository = vehiculesStatutRepository;
         this.statutVehiculeRepository = statutVehiculeRepository;
         this.maintenanceVehiculeRepository = maintenanceVehiculeRepository;
+        this.placeRepository = placeRepository;
     }
 
     // Avoir chiffre d affaire par vehicule
@@ -82,9 +85,47 @@ public class VehiculeService {
         v.setVehiculeModele(vehiculeModele);
         Vehicule saved = vehiculeRepository.save(v);
 
+        // Créer les places pour ce véhicule: 5 VIP (id_categorie=2) puis le reste Standard (id_categorie=1)
+        createPlacesForVehicule(saved, vehiculeModele.getPlace());
         // Historiser le statut initial
         historiserStatut(saved, 1);
         return saved;
+    }
+
+    // Crée et enregistre les places pour un véhicule donné
+    private void createPlacesForVehicule(Vehicule vehicule, int totalPlaces) {
+        if (vehicule == null || totalPlaces <= 0) return;
+
+        // Récupérer les catégories Standard (1) et VIP (2)
+        Categorie categorieStandard = categorieRepository.findById(1).orElse(null);
+        Categorie categorieVip = categorieRepository.findById(2).orElse(null);
+        Categorie categoriePrem = categorieRepository.findById(4).orElse(null);
+
+        List<Place> places = new ArrayList<>();
+
+        int vipCount = Math.min(2, totalPlaces); // 2 places VIP maximum
+        int premCount = Math.min(6, totalPlaces); // 6 places Premium maximum
+
+        for (int i = 1; i <= totalPlaces; i++) {
+            Place p = new Place();
+            p.setNumero(i);
+            p.setVehicule(vehicule);
+            if (i <= vipCount && categorieVip != null) {
+                p.setCategorie(categorieVip);
+            } else if((i <= vipCount + premCount) && (categoriePrem != null)) {
+                p.setCategorie(categoriePrem);
+            } else if (categorieStandard != null) {
+                p.setCategorie(categorieStandard);
+            } else {
+                // si aucune catégorie trouvée, on ignore l'enregistrement
+                continue;
+            }
+            places.add(p);
+        }
+
+        if (!places.isEmpty()) {
+            placeRepository.saveAll(places);
+        }
     }
 
     public List<Vehicule> listVehicules() {
@@ -185,4 +226,30 @@ public class VehiculeService {
         }
         return statuts.get(0).getVehiculeStatut().getLibelle();
     }
+
+    public Integer countPlace(Integer id_categorie) {
+        List<Place> places = placeRepository.findAll();
+        int count = 0;
+
+        for(Place place : places) {
+            if(place.getCategorie().getId() == id_categorie) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // Compte le nombre de places pour un véhicule donné et une catégorie donnée
+    public Integer countPlaceByVehiculeAndCategorie(Integer idVehicule, Integer idCategorie) {
+        if (idVehicule == null || idCategorie == null) return 0;
+        List<Place> places = placeRepository.findByVehicule_Id(idVehicule);
+        int count = 0;
+        for (Place p : places) {
+            if (p.getCategorie() != null && p.getCategorie().getId() != null && p.getCategorie().getId().equals(idCategorie)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 }
