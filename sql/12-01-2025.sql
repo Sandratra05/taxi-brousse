@@ -34,51 +34,57 @@ INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
 
 INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
 ('Toyota', 'Coaster', 11.0, 18),
-('Ford', 'Transit', 9.5, 20);
+('Ford', 'Transit', 9.5, 20),
+('Nissan', 'Civilian', 13.0, 25),
+('Hyundai', 'County', 10.5, 12),
+('Renault', 'Master', 12.0, 15),
+('Peugeot', 'Boxer', 11.5, 22),
+('Citroën', 'Jumper', 12.2, 28),
+('Mitsubishi', 'Fuso', 14.5, 20),
+('Isuzu', 'Elf', 13.5, 35),
+('Hino', 'Dutro', 15.5, 45),
+('Tata', 'Winger', 16.0, 30),
+('Mahindra', 'Supro', 14.8, 38);
 
 -- Insertion des véhicules
-INSERT INTO vehicule (immatriculation, consommation_l_100km, id_categorie, id_vehicule_modele) VALUES
-('1234-TAB', 12.5, 1, 1),
-('5678-TAM', 10.0, 1, 2),
-('9012-FIA', 15.0, 1, 3),
-('3456-MAH', 14.0, 1, 4);
+INSERT INTO vehicule (immatriculation, consommation_l_100km, id_vehicule_modele) VALUES
+('1234-TAB', 12.5, 1),
+('5678-TAM', 10.0, 2),
+('9012-FIA', 15.0, 3),
+('3456-MAH', 14.0, 4);
 
 -- Insertion des places pour les véhicules (exemple pour le premier véhicule, 32 places)
-INSERT INTO place (numero, id_vehicule) VALUES
 ALTER TABLE place ADD COLUMN IF NOT EXISTS id_categorie INTEGER;
 
 -- Mise à jour: on ajoute la colonne `id_categorie` (référence à `categorie`).
 -- Pour ces données d'exemple on renseigne `1` (Standard) par défaut.
--- Véhicule 1 : 32 places (premières 4 places VIP)
+-- Véhicule 1 : 32 places (alternance Standard, VIP, Premium)
 INSERT INTO place (numero, id_vehicule, id_categorie) VALUES
-(1, 1, 2), (2, 1, 2), (3, 1, 2), (4, 1, 2),
-(5, 1, 1), (6, 1, 1), (7, 1, 1), (8, 1, 1), (9, 1, 1), (10, 1, 1),
-(11, 1, 1), (12, 1, 1), (13, 1, 1), (14, 1, 1), (15, 1, 1), (16, 1, 1), (17, 1, 1), (18, 1, 1), (19, 1, 1), (20, 1, 1),
-(21, 1, 1), (22, 1, 1), (23, 1, 1), (24, 1, 1), (25, 1, 1), (26, 1, 1), (27, 1, 1), (28, 1, 1), (29, 1, 1), (30, 1, 1),
-(31, 1, 1), (32, 1, 1);
+(1, 1, 1), (2, 1, 2), (3, 1, 3), (4, 1, 1), (5, 1, 2), (6, 1, 3), (7, 1, 1), (8, 1, 2), (9, 1, 3), (10, 1, 1),
+(11, 1, 2), (12, 1, 3), (13, 1, 1), (14, 1, 2), (15, 1, 3), (16, 1, 1), (17, 1, 2), (18, 1, 3), (19, 1, 1), (20, 1, 2),
+(21, 1, 3), (22, 1, 1), (23, 1, 2), (24, 1, 3), (25, 1, 1), (26, 1, 2), (27, 1, 3), (28, 1, 1), (29, 1, 2), (30, 1, 3),
+(31, 1, 1), (32, 1, 2);
 
--- Véhicule 2 : 16 places (premières 2 places VIP)
+-- Véhicule 2 : 16 places (alternance Standard, VIP, Premium)
 INSERT INTO place (numero, id_vehicule, id_categorie) VALUES
-(1, 2, 2), (2, 2, 2), (3, 2, 1), (4, 2, 1), (5, 2, 1), (6, 2, 1), (7, 2, 1), (8, 2, 1), (9, 2, 1), (10, 2, 1),
-(11, 2, 1), (12, 2, 1), (13, 2, 1), (14, 2, 1), (15, 2, 1), (16, 2, 1);
+(1, 2, 1), (2, 2, 2), (3, 2, 3), (4, 2, 1), (5, 2, 2), (6, 2, 3), (7, 2, 1), (8, 2, 2), (9, 2, 3), (10, 2, 1),
+(11, 2, 2), (12, 2, 3), (13, 2, 1), (14, 2, 2), (15, 2, 3), (16, 2, 1);
 
--- Véhicule 3 : 50 places (premières 6 places VIP)
+-- Véhicule 3 : 50 places (alternance Standard, VIP, Premium)
 INSERT INTO place (numero, id_vehicule, id_categorie) VALUES
-(1, 3, 2), (2, 3, 2), (3, 3, 2), (4, 3, 2), (5, 3, 2), (6, 3, 2),
-(7, 3, 1), (8, 3, 1), (9, 3, 1), (10, 3, 1), (11, 3, 1), (12, 3, 1), (13, 3, 1), (14, 3, 1), (15, 3, 1), (16, 3, 1),
-(17, 3, 1), (18, 3, 1), (19, 3, 1), (20, 3, 1), (21, 3, 1), (22, 3, 1), (23, 3, 1), (24, 3, 1), (25, 3, 1), (26, 3, 1),
-(27, 3, 1), (28, 3, 1), (29, 3, 1), (30, 3, 1), (31, 3, 1), (32, 3, 1), (33, 3, 1), (34, 3, 1), (35, 3, 1), (36, 3, 1),
-(37, 3, 1), (38, 3, 1), (39, 3, 1), (40, 3, 1), (41, 3, 1), (42, 3, 1), (43, 3, 1), (44, 3, 1), (45, 3, 1), (46, 3, 1),
-(47, 3, 1), (48, 3, 1), (49, 3, 1), (50, 3, 1);
+(1, 3, 1), (2, 3, 2), (3, 3, 3), (4, 3, 1), (5, 3, 2), (6, 3, 3), (7, 3, 1), (8, 3, 2), (9, 3, 3), (10, 3, 1),
+(11, 3, 2), (12, 3, 3), (13, 3, 1), (14, 3, 2), (15, 3, 3), (16, 3, 1), (17, 3, 2), (18, 3, 3), (19, 3, 1), (20, 3, 2),
+(21, 3, 3), (22, 3, 1), (23, 3, 2), (24, 3, 3), (25, 3, 1), (26, 3, 2), (27, 3, 3), (28, 3, 1), (29, 3, 2), (30, 3, 3),
+(31, 3, 1), (32, 3, 2), (33, 3, 3), (34, 3, 1), (35, 3, 2), (36, 3, 3), (37, 3, 1), (38, 3, 2), (39, 3, 3), (40, 3, 1),
+(41, 3, 2), (42, 3, 3), (43, 3, 1), (44, 3, 2), (45, 3, 3), (46, 3, 1), (47, 3, 2), (48, 3, 3), (49, 3, 1), (50, 3, 2);
 
--- Véhicule 4 : 45 places (premières 5 places VIP)
+-- Véhicule 4 : 45 places (alternance Standard, VIP, Premium)
 INSERT INTO place (numero, id_vehicule, id_categorie) VALUES
-(1, 4, 2), (2, 4, 2), (3, 4, 2), (4, 4, 2), (5, 4, 2),
-(6, 4, 1), (7, 4, 1), (8, 4, 1), (9, 4, 1), (10, 4, 1),
-(11, 4, 1), (12, 4, 1), (13, 4, 1), (14, 4, 1), (15, 4, 1), (16, 4, 1), (17, 4, 1), (18, 4, 1), (19, 4, 1), (20, 4, 1),
-(21, 4, 1), (22, 4, 1), (23, 4, 1), (24, 4, 1), (25, 4, 1), (26, 4, 1), (27, 4, 1), (28, 4, 1), (29, 4, 1), (30, 4, 1),
-(31, 4, 1), (32, 4, 1), (33, 4, 1), (34, 4, 1), (35, 4, 1), (36, 4, 1), (37, 4, 1), (38, 4, 1), (39, 4, 1), (40, 4, 1),
-(41, 4, 1), (42, 4, 1), (43, 4, 1), (44, 4, 1), (45, 4, 1);
+(1, 4, 1), (2, 4, 2), (3, 4, 3), (4, 4, 1), (5, 4, 2), (6, 4, 3), (7, 4, 1), (8, 4, 2), (9, 4, 3), (10, 4, 1),
+(11, 4, 2), (12, 4, 3), (13, 4, 1), (14, 4, 2), (15, 4, 3), (16, 4, 1), (17, 4, 2), (18, 4, 3), (19, 4, 1), (20, 4, 2),
+(21, 4, 3), (22, 4, 1), (23, 4, 2), (24, 4, 3), (25, 4, 1), (26, 4, 2), (27, 4, 3), (28, 4, 1), (29, 4, 2), (30, 4, 3),
+(31, 4, 1), (32, 4, 2), (33, 4, 3), (34, 4, 1), (35, 4, 2), (36, 4, 3), (37, 4, 1), (38, 4, 2), (39, 4, 3), (40, 4, 1),
+(41, 4, 2), (42, 4, 3), (43, 4, 1), (44, 4, 2), (45, 4, 3);
 
 -- Insertion des statuts de véhicule
 INSERT INTO vehicule_statut (libelle) VALUES
@@ -138,7 +144,27 @@ INSERT INTO chauffeur (nom, prenom, telephone) VALUES
 ('Andry', 'Rakoto', '+261 34 12 345 67'),
 ('Faly', 'Rabe', '+261 34 23 456 78'),
 ('Hery', 'Razafy', '+261 34 34 567 89'),
-('Solo', 'Andrianina', '+261 34 45 678 90');
+('Solo', 'Andrianina', '+261 34 45 678 90'),
+('Mamy', 'Randria', '+261 34 56 789 01'),
+('Tiana', 'Rasoa', '+261 34 67 890 12'),
+('Noro', 'Rakotomalala', '+261 34 78 901 23'),
+('Lala', 'Ratsimbazafy', '+261 34 89 012 34'),
+('Sitraka', 'Rasolofonirina', '+261 34 90 123 45'),
+('Feno', 'Andriamasy', '+261 34 01 234 56'),
+('Koto', 'Razanakoto', '+261 34 12 345 67'),
+('Dina', 'Rasolofo', '+261 34 23 456 78'),
+('Miora', 'Rakotomamonjy', '+261 34 34 567 89'),
+('Hanta', 'Ratsimandrava', '+261 34 45 678 90'),
+('Tovo', 'Razanaka', '+261 34 56 789 01'),
+('Sariaka', 'Andrianarivo', '+261 34 67 890 12'),
+('Boto', 'Rasolo', '+261 34 78 901 23'),
+('Lova', 'Rakotobe', '+261 34 89 012 34'),
+('Nina', 'Ratsimbazafy', '+261 34 90 123 45'),
+('Dodo', 'Andrianina', '+261 34 01 234 56'),
+('Kely', 'Rasoa', '+261 34 12 345 67'),
+('Vola', 'Rakotoniaina', '+261 34 89 012 34'),
+('Mamy', 'Ratsimalahelo', '+261 34 90 123 45');
+
 
 -- Insertion des caractéristiques
 INSERT INTO caracteristique (libelle, id_unite) VALUES
@@ -262,15 +288,20 @@ INSERT INTO tarif (date_tarif, tarif, id_categorie, id_trajet) VALUES
 ('2026-01-01', 50000.00, 2, 2);
 
 -- Insertion des tarifs de places (place_tarif) — date : 2026-01-15
--- Pour chaque trajet, on ajoute un tarif Standard (id_categorie=1) et un tarif VIP (id_categorie=2).
+-- Pour chaque trajet, on ajoute un tarif Standard (id_categorie=1), VIP (id_categorie=2) et Premium (id_categorie=3).
 INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif) VALUES
 (1, 1, 50000.00, '2026-01-15 00:00:00'), -- Trajet 1 standard
 (2, 1, 60000.00, '2026-01-15 00:00:00'), -- Trajet 1 VIP
+(3, 1, 75000.00, '2026-01-15 00:00:00'), -- Trajet 1 Premium
 (1, 2, 40000.00, '2026-01-15 00:00:00'), -- Trajet 2 standard
 (2, 2, 50000.00, '2026-01-15 00:00:00'), -- Trajet 2 VIP
+(3, 2, 62500.00, '2026-01-15 00:00:00'), -- Trajet 2 Premium
 (1, 3, 60000.00, '2026-01-15 00:00:00'), -- Trajet 3 standard
-(2, 3, 72000.00, '2026-01-15 00:00:00'), -- Trajet 3 VIP (estimation: +20%)
+(2, 3, 72000.00, '2026-01-15 00:00:00'), -- Trajet 3 VIP
+(3, 3, 90000.00, '2026-01-15 00:00:00'), -- Trajet 3 Premium
 (1, 4, 50000.00, '2026-01-15 00:00:00'), -- Trajet 4 standard
-(2, 4, 60000.00, '2026-01-15 00:00:00'), -- Trajet 4 VIP (estimation: +20%)
+(2, 4, 60000.00, '2026-01-15 00:00:00'), -- Trajet 4 VIP
+(3, 4, 75000.00, '2026-01-15 00:00:00'), -- Trajet 4 Premium
 (1, 5, 70000.00, '2026-01-15 00:00:00'), -- Trajet 5 standard
-(2, 5, 84000.00, '2026-01-15 00:00:00'); -- Trajet 5 VIP (estimation: +20%)
+(2, 5, 84000.00, '2026-01-15 00:00:00'), -- Trajet 5 VIP
+(3, 5, 105000.00, '2026-01-15 00:00:00'); -- Trajet 5 Premium

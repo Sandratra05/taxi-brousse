@@ -21,4 +21,7 @@ public class PlaceTarifService {
 		return placeTarifRepository.findByTrajet_Id(trajetId);
 	}
 
+	public void saveAll(List<PlaceTarif> placeTarifs) {
+		placeTarifRepository.saveAll(placeTarifs);
+	}
 }

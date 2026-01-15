@@ -1,3 +1,7 @@
+\c postgres
+drop database taxi_brousse;
+create database taxi_brousse;
+\c taxi_brousse
 -- Script de mise à jour : table-12-01-2025.sql
 -- Supprimer les tables obsolètes
 DROP TABLE IF EXISTS statut_paiement;
@@ -62,11 +66,9 @@ CREATE TABLE vehicule(
    id_vehicule SERIAL,
    immatriculation VARCHAR(50) NOT NULL,
    consommation_l_100km NUMERIC(15,2) NOT NULL,
-   id_categorie INTEGER NOT NULL,
    id_vehicule_modele INTEGER NOT NULL,
    PRIMARY KEY(id_vehicule),
    UNIQUE(immatriculation),
-   FOREIGN KEY(id_categorie) REFERENCES categorie(id_categorie),
    FOREIGN KEY(id_vehicule_modele) REFERENCES vehicule_modele(id_vehicule_modele)
 );
 

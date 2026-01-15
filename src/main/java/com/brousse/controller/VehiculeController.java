@@ -79,8 +79,10 @@ public class VehiculeController {
     public String create(
             @RequestParam String immatriculation,
             @RequestParam BigDecimal consommation,
-            @RequestParam Integer categorieId,
             @RequestParam Integer vehiculeModeleId,
+            @RequestParam Integer nbVip,
+            @RequestParam Integer nbPremium,
+            @RequestParam Integer nbStandard,
             Model model
     ) {
         // Validations basiques
@@ -89,16 +91,21 @@ public class VehiculeController {
             model.addAttribute("immatriculationError", "Immatriculation obligatoire");
             hasError = true;
         }
-        if (consommation == null) {
-            model.addAttribute("consommationError", "Consommation obligatoire");
-            hasError = true;
-        }
-        if (categorieId == null) {
-            model.addAttribute("categorieIdError", "Catégorie obligatoire");
-            hasError = true;
-        }
+
         if (vehiculeModeleId == null) {
             model.addAttribute("vehiculeModeleIdError", "Modèle obligatoire");
+            hasError = true;
+        }
+        if (nbVip == null || nbVip < 0) {
+            model.addAttribute("nbVipError", "Nombre de places VIP invalide");
+            hasError = true;
+        }
+        if (nbPremium == null || nbPremium < 0) {
+            model.addAttribute("nbPremiumError", "Nombre de places Premium invalide");
+            hasError = true;
+        }
+        if (nbStandard == null || nbStandard < 0) {
+            model.addAttribute("nbStandardError", "Nombre de places Standard invalide");
             hasError = true;
         }
         if (hasError) {
@@ -107,12 +114,14 @@ public class VehiculeController {
             // Repasser aussi les valeurs saisies pour ne pas vider le formulaire
             model.addAttribute("immatriculation", immatriculation);
             model.addAttribute("consommation", consommation);
-            model.addAttribute("categorieId", categorieId);
             model.addAttribute("vehiculeModeleId", vehiculeModeleId);
+            model.addAttribute("nbVip", nbVip);
+            model.addAttribute("nbPremium", nbPremium);
+            model.addAttribute("nbStandard", nbStandard);
             return "vehicules/create";
         }
         
-        Vehicule v = vehiculeService.createVehicule(immatriculation, consommation, categorieId, vehiculeModeleId);
+        Vehicule v = vehiculeService.createVehicule(immatriculation, consommation, vehiculeModeleId, nbVip, nbPremium, nbStandard);
         return "redirect:/vehicules/" + v.getId();
     }
 
@@ -126,7 +135,6 @@ public class VehiculeController {
         model.addAttribute("vehiculeId", id);
         model.addAttribute("immatriculation", vehicule.getImmatriculation());
         model.addAttribute("consommation", vehicule.getConsommationL100km());
-        model.addAttribute("categorieId", vehicule.getCategorie().getId());
         model.addAttribute("vehiculeModeleId", vehicule.getVehiculeModele().getId());
         model.addAttribute("categories", categorieRepository.findAll());
         model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
@@ -139,7 +147,6 @@ public class VehiculeController {
             @PathVariable Integer id,
             @RequestParam(required = false) String immatriculation,
             @RequestParam(required = false) BigDecimal consommation,
-            @RequestParam(required = false) Integer categorieId,
             @RequestParam(required = false) Integer vehiculeModeleId,
             Model model
     ) {
@@ -152,13 +159,11 @@ public class VehiculeController {
             model.addAttribute("vehiculeId", id);
             model.addAttribute("immatriculation", immatriculation);
             model.addAttribute("consommation", consommation);
-            model.addAttribute("categorieId", categorieId);
             model.addAttribute("vehiculeModeleId", vehiculeModeleId);
-            model.addAttribute("categories", categorieRepository.findAll());
             model.addAttribute("vehiculeModeles", vehiculeModeleRepository.findAll());
             return "vehicules/edit";
         }
-        vehiculeService.updateVehicule(id, immatriculation, consommation, categorieId, vehiculeModeleId);
+        vehiculeService.updateVehicule(id, immatriculation, consommation, vehiculeModeleId);
         return "redirect:/vehicules/" + id;
     }
 

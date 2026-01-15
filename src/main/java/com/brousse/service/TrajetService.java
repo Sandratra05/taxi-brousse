@@ -10,6 +10,7 @@ import com.brousse.model.Trajet;
 import com.brousse.model.Tarif;
 import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.TarifRepository;
+import com.brousse.repository.CategorieRepository;
 
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
@@ -20,11 +21,17 @@ import java.util.Optional;
 
 @Service
 public class TrajetService {
-    @Autowired
-    private TrajetRepository trajetRepository;
-    
-    @Autowired
-    private TarifRepository tarifRepository;
+    private final TrajetRepository trajetRepository;
+
+    private final TarifRepository tarifRepository;
+
+    private final CategorieRepository categorieRepository;
+
+    public TrajetService(TrajetRepository trajetRepository, TarifRepository tarifRepository, CategorieRepository categorieRepository) {
+        this.trajetRepository = trajetRepository;
+        this.tarifRepository = tarifRepository;
+        this.categorieRepository = categorieRepository;
+    }
 
     // Create
     public Trajet create(Trajet trajet) {

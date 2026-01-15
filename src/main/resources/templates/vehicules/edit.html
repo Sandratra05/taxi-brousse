@@ -22,17 +22,6 @@
             </label>
             <span th:if="${consommationError}" class="error-message" th:text="${consommationError}"></span>
 
-            <label>Catégorie:
-                <select name="categorieId">
-                    <option value="">-- Choisir une catégorie --</option>
-                    <option th:each="cat : ${categories}"
-                            th:value="${cat.id}"
-                            th:text="${cat.code + ' - ' + cat.nom}"
-                            th:selected="${categorieId == cat.id}"></option>
-                </select>
-            </label>
-            <span th:if="${categorieIdError}" class="error-message" th:text="${categorieIdError}"></span>
-
             <label>Modèle de véhicule:
                 <select name="vehiculeModeleId">
                     <option value="">-- Choisir un modèle --</option>
