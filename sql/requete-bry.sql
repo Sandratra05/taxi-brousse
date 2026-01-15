@@ -32,3 +32,4 @@ GROUP BY
     t.distance_km,
     t.duree_estimee_minutes
 ORDER BY id_trajet ASC;
+

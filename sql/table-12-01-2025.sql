@@ -99,7 +99,9 @@ CREATE TABLE place(
    id_place SERIAL,
    numero INTEGER NOT NULL,
    id_vehicule INTEGER NOT NULL,
+   id_categorie INTEGER NOT NULL,
    PRIMARY KEY(id_place),
+   FOREIGN KEY (id_categorie) REFERENCES categorie(id_categorie),
    FOREIGN KEY(id_vehicule) REFERENCES vehicule(id_vehicule)
 );
 
@@ -310,4 +312,14 @@ CREATE TABLE tarif(
    PRIMARY KEY(id_tarif),
    FOREIGN KEY(id_categorie) REFERENCES categorie(id_categorie),
    FOREIGN KEY(id_trajet) REFERENCES trajet(id_trajet)
+);
+
+CREATE TABLE place_tarif (
+    id_place_tarif SERIAL PRIMARY KEY,
+    id_categorie INT NOT NULL,
+    id_trajet INT NOT NULL,
+    tarif DECIMAL(15, 2) NOT NULL,
+    date_tarif TIMESTAMP NOT NULL,
+    FOREIGN KEY (id_categorie) REFERENCES categorie(id_categorie),
+    FOREIGN KEY (id_trajet) REFERENCES trajet(id_trajet)
 );

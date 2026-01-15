@@ -208,3 +208,6 @@ INSERT INTO statut_paiement (id_paiement, id_paiement_statut, date_statut) VALUE
 (3, 1, '2023-07-01'),
 (4, 1, '2023-07-04');
 
+
+INSERT INTO categorie(nom, code, ) VALUES
+('Premium');
