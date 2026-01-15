@@ -96,7 +96,15 @@
 
             <td th:text="${item.voyage.trajet != null ? (item.voyage.trajet.gareDepart.nom + ' → ' + item.voyage.trajet.gareArrivee.nom) : '-'}"></td>
             <td th:text="${item.voyage.chauffeur != null ? (item.voyage.chauffeur.nom + ' ' + item.voyage.chauffeur.prenom) : '-'}"></td>
-            <td th:text="${item.voyage.vehicule != null ? item.voyage.vehicule.immatriculation : '-'}"></td>
+            <td>
+                <span th:text="${item.voyage.vehicule != null ? item.voyage.vehicule.immatriculation : '-'}"></span>
+                <div th:if="${placesParCategorie[item.voyage.id] != null}">
+                    <small style="display:block; color:#1565C0;">
+                        Revenue estimée: 
+                        <span th:text="${#numbers.formatDecimal(placesParCategorie[item.voyage.id].revenueMax, 0, 'COMMA', 2, 'POINT')} + AR"></span>
+                    </small>
+                </div>
+            </td>
 
             <td>
                 <span th:if="${item.statut == 'Prévue'}" class="status-prevue" th:text="${item.statut}"></span>

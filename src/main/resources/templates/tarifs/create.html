@@ -21,21 +21,29 @@
                 </select>
             </label>
 
-            <label>Catégorie:
+            <!-- <label>Catégorie:
                 <select name="categorieId" required>
                     <option value="">-- Choisir une catégorie --</option>
                     <option th:each="categorie : ${categories}"
                             th:value="${categorie.id}"
                             th:text="${categorie.nom}"></option>
                 </select>
-            </label>
+            </label> -->
 
             <label>Date du tarif:
                 <input type="date" name="dateTarif" required/>
             </label>
 
-            <label>Tarif (Ar):
-                <input type="number" step="0.01" name="tarif" placeholder="Ex: 25000" required/>
+            <label>Tarif VIP (Ar):
+                <input type="number" step="0.01" name="tarifvip" placeholder="Ex: 25000" required/>
+            </label>
+
+            <label>Tarif Premium (Ar):
+                <input type="number" step="0.01" name="tarifpremium" placeholder="Ex: 25000" required/>
+            </label>
+
+            <label>Tarif Standard (Ar):
+                <input type="number" step="0.01" name="tarifstandard" placeholder="Ex: 25000" required/>
             </label>
 
             <div class="actions-buttons">

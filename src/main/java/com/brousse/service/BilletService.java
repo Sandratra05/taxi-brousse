@@ -56,6 +56,9 @@ public class BilletService {
     @Autowired
     private VehiculeService vehiculeService;
 
+    @Autowired
+    private PlaceTarifRepository placeTarifRepository;
+
     /**
      * Récupère un billet par place et voyage
      */
@@ -187,15 +190,7 @@ public class BilletService {
         Client client = clientRepository.findById(idClient)
                 .orElseThrow(() -> new IllegalArgumentException("Client introuvable"));
 
-        // Calculer le tarif pour ce voyage
         Trajet trajet = voyage.getTrajet();
-        List<Tarif> tarifs = tarifRepository.findAll();
-        Tarif tarif = tarifs.stream()
-                .filter(t -> t.getTrajet().getId().equals(trajet.getId()))
-                .max((t1, t2) -> t1.getDateTarif().compareTo(t2.getDateTarif()))
-                .orElseThrow(() -> new IllegalArgumentException("Aucun tarif défini pour ce trajet"));
-
-        BigDecimal tarifUnitaire = tarif.getTarif();
         BigDecimal montantTotal = BigDecimal.ZERO;
 
         // Créer la commande
@@ -203,7 +198,7 @@ public class BilletService {
         commande.setClient(client);
         commande.setDate(Instant.now());
 
-        // Créer les billets et calculer le montant total
+        // Calculer le montant total et vérifier disponibilité
         for (Integer idPlace : placesIds) {
             Place place = placeRepository.findById(idPlace)
                     .orElseThrow(() -> new IllegalArgumentException("Place introuvable: " + idPlace));
@@ -213,7 +208,13 @@ public class BilletService {
                 throw new IllegalStateException("La place " + place.getNumero() + " n'est plus disponible");
             }
 
-            montantTotal = montantTotal.add(tarifUnitaire);
+            // Trouver le tarif le plus récent pour ce trajet et cette catégorie
+            PlaceTarif placeTarif = placeTarifRepository.findByTrajet_Id(trajet.getId()).stream()
+                    .filter(pt -> pt.getCategorie().getId().equals(place.getCategorie().getId()))
+                    .max((pt1, pt2) -> pt1.getDateTarif().compareTo(pt2.getDateTarif()))
+                    .orElseThrow(() -> new IllegalArgumentException("Aucun tarif défini pour ce trajet et cette catégorie"));
+
+            montantTotal = montantTotal.add(placeTarif.getTarif());
         }
 
         commande.setMontantTotal(montantTotal);
@@ -223,11 +224,17 @@ public class BilletService {
         for (Integer idPlace : placesIds) {
             Place place = placeRepository.findById(idPlace).orElseThrow();
 
+            // Trouver le tarif pour ce billet
+            PlaceTarif placeTarif = placeTarifRepository.findByTrajet_Id(trajet.getId()).stream()
+                    .filter(pt -> pt.getCategorie().getId().equals(place.getCategorie().getId()))
+                    .max((pt1, pt2) -> pt1.getDateTarif().compareTo(pt2.getDateTarif()))
+                    .orElseThrow();
+
             // Créer le billet
             Billet billet = new Billet();
             billet.setVoyage(voyage);
             billet.setPlace(place);
-            billet.setMontantTotal(tarifUnitaire);
+            billet.setMontantTotal(placeTarif.getTarif());
             billet.setStatut("Non Payé");
             billet.setCodeBillet(genererCodeBillet());
             billet = billetRepository.save(billet);
@@ -297,37 +304,6 @@ public class BilletService {
             statutPaiement.setDateStatut(Instant.now());
 
             statutPaiementRepository.save(statutPaiement);
-        }
-    }
-
-    public void genererBillet (Integer idVoyage, Integer idVehicule) {
-        Voyage voyage = voyageRepository.findById(idVoyage)
-                .orElseThrow(() -> new IllegalArgumentException("Voyage introuvable"));
-
-        Vehicule vehicule = vehiculeService.getVehicule(idVehicule)
-                .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable"));
-
-        Trajet trajet = voyage.getTrajet();
-        BigDecimal tarifUnitaire = BigDecimal.ZERO;
-        List<Tarif> tarifs = tarifRepository.findAll();
-        Tarif tarif = tarifs.stream()
-                .filter(t -> t.getTrajet().equals(trajet) && t.getCategorie().equals(vehicule.getCategorie()))
-                .max((t1, t2) -> t1.getDateTarif().compareTo(t2.getDateTarif()))
-                .orElseThrow(() -> new IllegalArgumentException("Aucun tarif défini pour ce trajet et cette catégorie"));
-        tarifUnitaire = tarif.getTarif();
-
-        List<Place> places = placeService.getPlacesByVehicule(idVehicule);
-//        Integer nbPlace = vehicule.getVehiculeModele().getPlace();
-
-        for (Place place : places) {
-            // Créer le billet
-            Billet billet = new Billet();
-            billet.setVoyage(voyage);
-            billet.setPlace(place);
-            billet.setMontantTotal(tarifUnitaire);
-            billet.setStatut("Non Payé");
-            billet.setCodeBillet(genererCodeBillet());
-            billetRepository.save(billet);
         }
     }
 }

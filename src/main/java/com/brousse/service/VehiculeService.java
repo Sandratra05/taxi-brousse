@@ -21,6 +21,7 @@ public class VehiculeService {
     private final VehiculesStatutRepository vehiculesStatutRepository;
     private final StatutVehiculeRepository statutVehiculeRepository;
     private final MaintenanceVehiculeRepository maintenanceVehiculeRepository;
+    public final PlaceRepository placeRepository;
 
     public VehiculeService(
             VehiculeRepository vehiculeRepository,
@@ -28,7 +29,8 @@ public class VehiculeService {
             VehiculeModeleRepository vehiculeModeleRepository,
             VehiculesStatutRepository vehiculesStatutRepository,
             StatutVehiculeRepository statutVehiculeRepository,
-            MaintenanceVehiculeRepository maintenanceVehiculeRepository
+            MaintenanceVehiculeRepository maintenanceVehiculeRepository,
+            PlaceRepository placeRepository
     ) {
         this.vehiculeRepository = vehiculeRepository;
         this.categorieRepository = categorieRepository;
@@ -36,6 +38,7 @@ public class VehiculeService {
         this.vehiculesStatutRepository = vehiculesStatutRepository;
         this.statutVehiculeRepository = statutVehiculeRepository;
         this.maintenanceVehiculeRepository = maintenanceVehiculeRepository;
+        this.placeRepository = placeRepository;
     }
 
     // Avoir chiffre d affaire par vehicule
@@ -63,28 +66,79 @@ public class VehiculeService {
 
     // Création d'un véhicule avec statut initial "disponible" et association à une configuration de places existante
     @Transactional
-    public Vehicule createVehicule(String immatriculation, BigDecimal consommation, Integer categorieId, Integer vehiculeModeleId) {
+    public Vehicule createVehicule(String immatriculation, BigDecimal consommation, Integer vehiculeModeleId, Integer nbVip, Integer nbPremium, Integer nbStandard) {
         if (immatriculation == null || immatriculation.isBlank()) {
             throw new IllegalArgumentException("Immatriculation obligatoire");
         }
         if (consommation == null) {
             throw new IllegalArgumentException("Consommation obligatoire");
         }
-        Categorie categorie = categorieRepository.findById(categorieId)
-                .orElseThrow(() -> new IllegalArgumentException("Categorie introuvable: " + categorieId));
+
         VehiculeModele vehiculeModele = vehiculeModeleRepository.findById(vehiculeModeleId)
                 .orElseThrow(() -> new IllegalArgumentException("VehiculeModele introuvable: " + vehiculeModeleId));
+
+        int totalPlaces = vehiculeModele.getPlace();
+        if (nbVip + nbPremium + nbStandard != totalPlaces) {
+            throw new IllegalArgumentException("Le nombre total de places doit correspondre au modèle: " + totalPlaces);
+        }
 
         Vehicule v = new Vehicule();
         v.setImmatriculation(immatriculation);
         v.setConsommationL100km(consommation);
-        v.setCategorie(categorie);
         v.setVehiculeModele(vehiculeModele);
         Vehicule saved = vehiculeRepository.save(v);
 
+        // Créer les places pour ce véhicule selon les nombres spécifiés
+        createPlacesForVehicule(saved, nbVip, nbPremium, nbStandard);
         // Historiser le statut initial
         historiserStatut(saved, 1);
         return saved;
+    }
+
+    // Crée et enregistre les places pour un véhicule donné
+    private void createPlacesForVehicule(Vehicule vehicule, int nbVip, int nbPremium, int nbStandard) {
+        if (vehicule == null || (nbVip + nbPremium + nbStandard) <= 0) return;
+
+        // Récupérer les catégories Standard (1) et VIP (2)
+        Categorie categorieStandard = categorieRepository.findById(1).orElse(null);
+        Categorie categorieVip = categorieRepository.findById(2).orElse(null);
+        Categorie categoriePrem = categorieRepository.findById(3).orElse(null);
+
+        List<Place> places = new ArrayList<>();
+
+        for (int i = 1; i <= nbVip; i++) {
+            Place p = new Place();
+            p.setNumero(i);
+            p.setVehicule(vehicule);
+            if (categorieVip != null) {
+                p.setCategorie(categorieVip);
+            }
+            places.add(p);
+        }
+
+        for (int i = nbVip + 1; i <= nbVip + nbPremium; i++) {
+            Place p = new Place();
+            p.setNumero(i);
+            p.setVehicule(vehicule);
+            if (categoriePrem != null) {
+                p.setCategorie(categoriePrem);
+            }
+            places.add(p);
+        }
+
+        for (int i = nbVip + nbPremium + 1; i <= nbVip + nbPremium + nbStandard; i++) {
+            Place p = new Place();
+            p.setNumero(i);
+            p.setVehicule(vehicule);
+            if (categorieStandard != null) {
+                p.setCategorie(categorieStandard);
+            }
+            places.add(p);
+        }
+
+        if (!places.isEmpty()) {
+            placeRepository.saveAll(places);
+        }
     }
 
     public List<Vehicule> listVehicules() {
@@ -96,16 +150,12 @@ public class VehiculeService {
     }
 
     @Transactional
-    public Vehicule updateVehicule(Integer id, String immatriculation, BigDecimal consommation, Integer categorieId, Integer vehiculeModeleId) {
+    public Vehicule updateVehicule(Integer id, String immatriculation, BigDecimal consommation, Integer vehiculeModeleId) {
         Vehicule v = vehiculeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicule introuvable: " + id));
         if (immatriculation != null && !immatriculation.isBlank()) v.setImmatriculation(immatriculation);
         if (consommation != null) v.setConsommationL100km(consommation);
-        if (categorieId != null) {
-            Categorie categorie = categorieRepository.findById(categorieId)
-                    .orElseThrow(() -> new IllegalArgumentException("Categorie introuvable: " + categorieId));
-            v.setCategorie(categorie);
-        }
+
         if (vehiculeModeleId != null) {
             VehiculeModele vehiculeModele = vehiculeModeleRepository.findById(vehiculeModeleId)
                     .orElseThrow(() -> new IllegalArgumentException("VehiculeModele introuvable: " + vehiculeModeleId));
@@ -185,4 +235,30 @@ public class VehiculeService {
         }
         return statuts.get(0).getVehiculeStatut().getLibelle();
     }
+
+    public Integer countPlace(Integer id_categorie) {
+        List<Place> places = placeRepository.findAll();
+        int count = 0;
+
+        for(Place place : places) {
+            if(place.getCategorie().getId() == id_categorie) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // Compte le nombre de places pour un véhicule donné et une catégorie donnée
+    public Integer countPlaceByVehiculeAndCategorie(Integer idVehicule, Integer idCategorie) {
+        if (idVehicule == null || idCategorie == null) return 0;
+        List<Place> places = placeRepository.findByVehicule_Id(idVehicule);
+        int count = 0;
+        for (Place p : places) {
+            if (p.getCategorie() != null && p.getCategorie().getId() != null && p.getCategorie().getId().equals(idCategorie)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 }

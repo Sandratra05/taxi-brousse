@@ -23,10 +23,6 @@ public class Vehicule {
     private BigDecimal consommationL100km;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_categorie", nullable = false)
-    private Categorie categorie;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_vehicule_modele", nullable = false)
     private VehiculeModele vehiculeModele;
 

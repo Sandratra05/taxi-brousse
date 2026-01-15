@@ -27,4 +27,5 @@ public class VehiculeModele {
 
     @Column(name = "place", nullable = false)
     private Integer place;
+
 }

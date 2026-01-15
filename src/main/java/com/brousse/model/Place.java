@@ -21,4 +21,8 @@ public class Place {
     @JoinColumn(name = "id_vehicule", nullable = false)
     private Vehicule vehicule;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_categorie", nullable = false)
+    private Categorie categorie;
+    
 }

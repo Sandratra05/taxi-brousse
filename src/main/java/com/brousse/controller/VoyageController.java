@@ -3,14 +3,18 @@ package com.brousse.controller;
 import com.brousse.dto.VoyageFilterDTO;
 import com.brousse.dto.VoyageDTO;
 import com.brousse.model.Voyage;
+import com.brousse.model.PlaceTarif;
 import com.brousse.model.Vehicule;
 import com.brousse.model.VehiculeStatut;
 import com.brousse.repository.ChauffeurRepository;
+import com.brousse.repository.PlaceTarifRepository;
 import com.brousse.repository.VoyageStatutRepository;
 import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.VehiculeRepository;
 import com.brousse.repository.VehiculeStatutRepository;
 import com.brousse.service.BilletService;
+import com.brousse.service.VehiculeService;
+import com.brousse.service.PlaceTarifService;
 import com.brousse.service.VoyageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,13 +34,16 @@ public class VoyageController {
 
     private final VoyageService voyageService;
     private final ChauffeurRepository chauffeurRepository;
+    private final PlaceTarifRepository placeTarifRepository;
     private final VehiculeRepository vehiculeRepository;
     private final TrajetRepository trajetRepository;
     private final VoyageStatutRepository voyageStatutRepository;
     private final VehiculeStatutRepository vehiculeStatutRepository;
     private final BilletService billetService;
+    private final VehiculeService vehiculeService;
+    private final PlaceTarifService placeTarifService;
 
-    public VoyageController(VoyageService voyageService, ChauffeurRepository chauffeurRepository, VehiculeRepository vehiculeRepository, TrajetRepository trajetRepository, VoyageStatutRepository voyageStatutRepository, VehiculeStatutRepository vehiculeStatutRepository, BilletService billetService) {
+    public VoyageController(VoyageService voyageService, ChauffeurRepository chauffeurRepository, VehiculeRepository vehiculeRepository, TrajetRepository trajetRepository, VoyageStatutRepository voyageStatutRepository, VehiculeStatutRepository vehiculeStatutRepository, BilletService billetService, VehiculeService vehiculeService, PlaceTarifService placeTarifService, PlaceTarifRepository placeTarifRepository) {
         this.voyageService = voyageService;
         this.chauffeurRepository = chauffeurRepository;
         this.vehiculeRepository = vehiculeRepository;
@@ -44,6 +51,9 @@ public class VoyageController {
         this.voyageStatutRepository = voyageStatutRepository;
         this.vehiculeStatutRepository = vehiculeStatutRepository;
         this.billetService = billetService;
+        this.vehiculeService = vehiculeService;
+        this.placeTarifService = placeTarifService;
+        this.placeTarifRepository = placeTarifRepository;
     }
 
     // ----- Helpers -----
@@ -147,6 +157,43 @@ public class VoyageController {
             voyagesWithStatus.add(item);
         }
         model.addAttribute("voyagesWithStatus", voyagesWithStatus);
+
+        Map<Integer, Map<String, Object>> placesParCategorie = new HashMap<>();
+        for(Voyage v : voyages) {
+            Map<String, Object> places = new HashMap<>();
+            Integer vehId = v.getVehicule() != null ? v.getVehicule().getId() : null;
+            Integer nbStandard = vehiculeService.countPlaceByVehiculeAndCategorie(vehId, 1);
+            Integer nbVip = vehiculeService.countPlaceByVehiculeAndCategorie(vehId, 2);
+            Integer nbPremium = vehiculeService.countPlaceByVehiculeAndCategorie(vehId, 3);
+
+            // Récupérer les tarifs applicables pour le trajet de ce voyage
+            // java.util.List<com.brousse.model.PlaceTarif> placeTarifs = placeTarifService.findByTrajetId(v.getTrajet() != null ? v.getTrajet().getId() : null);
+            List<PlaceTarif> placeTarifs = placeTarifRepository.findAll();
+            java.util.Map<String, Integer> tarifs = voyageService.getTarif(v, placeTarifs);
+
+                Integer tarifStandard = tarifs.getOrDefault("Standard", 0);
+                Integer tarifVip = tarifs.getOrDefault("VIP", 0);
+                Integer tarifPremium = tarifs.getOrDefault("Premium", 0);
+
+                // System.out.println("Tarif Standard: " + tarifStandard);
+                // System.out.println("Nb Standard: " + nbStandard);
+                // System.out.println("Tarif VIP: " + tarifVip);
+                // System.out.println("Nb VIP: " + nbVip);
+                // System.out.println("Tarif Premium: " + tarifPremium);
+                // System.out.println("Nb Premium: " + nbPremium);
+
+                double revenueMax = (nbVip != null ? nbVip : 0) * tarifVip
+                    + (nbStandard != null ? nbStandard : 0) * tarifStandard
+                    + (nbPremium != null ? nbPremium : 0) * tarifPremium;
+
+            places.put("standard", nbStandard);
+            places.put("vip", nbVip);
+            places.put("premium", nbPremium);
+            places.put("revenueMax", revenueMax);
+
+            placesParCategorie.put(v.getId(), places);
+        }
+        model.addAttribute("placesParCategorie", placesParCategorie);
 
         // Charger les données pour les filtres
         model.addAttribute("trajets", trajetRepository.findAll());

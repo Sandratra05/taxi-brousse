@@ -13,23 +13,23 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Trajet</th>
-                    <th>Catégorie</th>
                     <th>Date du tarif</th>
-                    <th>Tarif</th>
+                    <th>Standard</th>
+                    <th>Premium</th>
+                    <th>VIP</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="tarif : ${tarifs}">
-                    <td th:text="${tarif.id}"></td>
                     <td th:text="${tarif.trajet.gareDepart.nom + ' - ' + tarif.trajet.gareArrivee.nom}"></td>
-                    <td th:text="${tarif.categorie.nom}"></td>
                     <td th:text="${#temporals.format(tarif.dateTarif, 'dd/MM/yyyy')}"></td>
-                    <td th:text="${tarif.tarif + ' Ar'}"></td>
+                    <td th:text="${tarif.tarifStandard + ' Ar'}"></td>
+                    <td th:text="${tarif.tarifPremium + ' Ar'}"></td>
+                    <td th:text="${tarif.tarifVip + ' Ar'}"></td>
                     <td>
-                        <!-- Actions if needed -->
+                        <a th:href="@{/tarifs/edit/{trajetId}/{dateStr}(trajetId=${tarif.trajet.id}, dateStr=${#temporals.format(tarif.dateTarif, 'yyyy-MM-dd')})}" class="btn btn-edit">Modifier</a>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(tarifs)}">

@@ -22,27 +22,34 @@
             </label>
             <span th:if="${consommationError}" class="error-message" th:text="${consommationError}"></span>
 
-            <label>Catégorie:
-                <select name="categorieId" required>
-                    <option value="">-- Choisir une catégorie --</option>
-                    <option th:each="cat : ${categories}"
-                            th:value="${cat.id}"
-                            th:text="${cat.code + ' - ' + cat.nom}"
-                            th:selected="${categorieId == cat.id}"></option>
-                </select>
-            </label>
-            <span th:if="${categorieIdError}" class="error-message" th:text="${categorieIdError}"></span>
-
             <label>Modèle de véhicule:
-                <select name="vehiculeModeleId" required>
+                <select id="vehiculeModeleId" name="vehiculeModeleId" required>
                     <option value="">-- Choisir un modèle --</option>
                     <option th:each="modele : ${vehiculeModeles}"
                             th:value="${modele.id}"
                             th:text="${modele.marque + ' ' + modele.modele + ' (' + modele.place + ' places)'}"
-                            th:selected="${vehiculeModeleId == modele.id}"></option>
+                            th:selected="${vehiculeModeleId == modele.id}"
+                            th:attr="data-places=${modele.place}"></option>
                 </select>
             </label>
             <span th:if="${vehiculeModeleIdError}" class="error-message" th:text="${vehiculeModeleIdError}"></span>
+
+            <h3><i class="fas fa-chair"></i> Configuration des places</h3>
+
+            <label>Nombre de places VIP:
+                <input type="number" id="nbVip" name="nbVip" th:value="${nbVip}" min="0" required/>
+            </label>
+            <span th:if="${nbVipError}" class="error-message" th:text="${nbVipError}"></span>
+
+            <label>Nombre de places Premium:
+                <input type="number" id="nbPremium" name="nbPremium" th:value="${nbPremium}" min="0" required/>
+            </label>
+            <span th:if="${nbPremiumError}" class="error-message" th:text="${nbPremiumError}"></span>
+
+            <label>Nombre de places Standard:
+                <input type="number" id="nbStandard" name="nbStandard" th:value="${nbStandard}" min="0" readonly/>
+            </label>
+            <span th:if="${nbStandardError}" class="error-message" th:text="${nbStandardError}"></span>
 
             <div class="actions-buttons">
                 <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Créer</button>
@@ -50,5 +57,29 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const vehiculeModeleSelect = document.getElementById('vehiculeModeleId');
+            const nbVipInput = document.getElementById('nbVip');
+            const nbPremiumInput = document.getElementById('nbPremium');
+            const nbStandardInput = document.getElementById('nbStandard');
+
+            function updatePlaces() {
+                const selectedOption = vehiculeModeleSelect.options[vehiculeModeleSelect.selectedIndex];
+                const totalPlaces = selectedOption ? parseInt(selectedOption.getAttribute('data-places')) || 0 : 0;
+                const nbVip = parseInt(nbVipInput.value) || 0;
+                const nbPremium = parseInt(nbPremiumInput.value) || 0;
+                nbStandardInput.value = totalPlaces - nbVip - nbPremium;
+            }
+
+            vehiculeModeleSelect.addEventListener('change', updatePlaces);
+            nbVipInput.addEventListener('input', updatePlaces);
+            nbPremiumInput.addEventListener('input', updatePlaces);
+
+            // Initial calculation if values are set
+            updatePlaces();
+        });
+    </script>
 </body>
 </html>

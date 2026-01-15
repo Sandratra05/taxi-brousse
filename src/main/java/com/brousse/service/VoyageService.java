@@ -13,12 +13,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 
 import com.brousse.dto.VoyageDTO;
 import com.brousse.dto.VoyageFilterDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @Service
 @Transactional
@@ -147,6 +150,35 @@ public class VoyageService {
         return voyageRepository.save(voyage);
     }
 
+
+    // public Map<String, Integer> getTarif(Voyage v, List<PlaceTarif> placeTarifs) {
+    //     Map<String, Integer> tarifMap = new HashMap<>();
+    //     if (v == null || v.getTrajet() == null || v.getDateDepart() == null) return tarifMap;
+    //     LocalDate voyageDate = v.getDateDepart().toLocalDate();
+    //     for (PlaceTarif pt : placeTarifs) {
+    //         if (pt == null || pt.getTrajet() == null || pt.getDateTarif() == null || pt.getCategorie() == null) continue;
+    //         // même trajet
+    //         if (!pt.getTrajet().getId().equals(v.getTrajet().getId())) continue;
+
+    //         // n'utiliser que les tarifs dont la date_tarif est <= date de départ du voyage
+    //         LocalDate tarifDate = pt.getDateTarif().toLocalDate();
+    //         if (tarifDate.isAfter(voyageDate)) continue; 
+
+    //         tarifMap.put(pt.getCategorie().getNom(), pt.getTarif().intValue());
+    //     }
+    //     return tarifMap;
+    // }
+
+    public Map<String, Integer> getTarif(Voyage v, List<PlaceTarif> placeTarifs) {
+        Map<String, Integer> tarifMap = new HashMap<>();
+        for(PlaceTarif pt : placeTarifs) {
+            if(pt.getTrajet().getId().equals(v.getTrajet().getId())) {
+                tarifMap.put(pt.getCategorie().getNom(), pt.getTarif().intValue());
+            }
+        }
+        return tarifMap;
+    }
+
     @Transactional(readOnly = true)
     public List<Voyage> listerVoyages() {
         return voyageRepository.findAll();
@@ -186,6 +218,9 @@ public class VoyageService {
         };
 
         List<Voyage> voyages = voyageRepository.findAll(spec);
+        for (Voyage v : voyages) {
+           
+        }
 
         // Filter status in memory
         if (filtres.getStatutId() != null) {
