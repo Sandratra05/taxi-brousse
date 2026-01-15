@@ -111,6 +111,7 @@ public class VehiculeController {
             model.addAttribute("vehiculeModeleId", vehiculeModeleId);
             return "vehicules/create";
         }
+        
         Vehicule v = vehiculeService.createVehicule(immatriculation, consommation, categorieId, vehiculeModeleId);
         return "redirect:/vehicules/" + v.getId();
     }
