@@ -19,8 +19,15 @@ INSERT INTO unite (nom, code) VALUES
 
 -- Insertion des catégories de véhicule
 INSERT INTO categorie (code, nom, ordre, active) VALUES
-('STD', 'Standard', 1, true),
+('ECO', 'Economique', 1, true),
 ('VIP', 'VIP', 2, true);
+
+INSERT INTO type_client (libelle) VALUES
+('Adulte'),
+('Enfant');
+
+INSERT INTO type_client (libelle) VALUES
+('Senior');
 
 INSERT INTO categorie (code, nom, ordre, active) VALUES
 ('PRM', 'Premium', 3, true);
@@ -45,6 +52,9 @@ INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
 ('Hino', 'Dutro', 15.5, 45),
 ('Tata', 'Winger', 16.0, 30),
 ('Mahindra', 'Supro', 14.8, 38);
+
+INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
+('Force Motors', 'Traveller', 12.7, 20);
 
 -- Insertion des véhicules
 INSERT INTO vehicule (immatriculation, consommation_l_100km, id_vehicule_modele) VALUES
@@ -289,19 +299,35 @@ INSERT INTO tarif (date_tarif, tarif, id_categorie, id_trajet) VALUES
 
 -- Insertion des tarifs de places (place_tarif) — date : 2026-01-15
 -- Pour chaque trajet, on ajoute un tarif Standard (id_categorie=1), VIP (id_categorie=2) et Premium (id_categorie=3).
-INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif) VALUES
-(1, 1, 50000.00, '2026-01-15 00:00:00'), -- Trajet 1 standard
-(2, 1, 60000.00, '2026-01-15 00:00:00'), -- Trajet 1 VIP
-(3, 1, 75000.00, '2026-01-15 00:00:00'), -- Trajet 1 Premium
-(1, 2, 40000.00, '2026-01-15 00:00:00'), -- Trajet 2 standard
-(2, 2, 50000.00, '2026-01-15 00:00:00'), -- Trajet 2 VIP
-(3, 2, 62500.00, '2026-01-15 00:00:00'), -- Trajet 2 Premium
-(1, 3, 60000.00, '2026-01-15 00:00:00'), -- Trajet 3 standard
-(2, 3, 72000.00, '2026-01-15 00:00:00'), -- Trajet 3 VIP
-(3, 3, 90000.00, '2026-01-15 00:00:00'), -- Trajet 3 Premium
-(1, 4, 50000.00, '2026-01-15 00:00:00'), -- Trajet 4 standard
-(2, 4, 60000.00, '2026-01-15 00:00:00'), -- Trajet 4 VIP
-(3, 4, 75000.00, '2026-01-15 00:00:00'), -- Trajet 4 Premium
-(1, 5, 70000.00, '2026-01-15 00:00:00'), -- Trajet 5 standard
-(2, 5, 84000.00, '2026-01-15 00:00:00'), -- Trajet 5 VIP
-(3, 5, 105000.00, '2026-01-15 00:00:00'); -- Trajet 5 Premium
+INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_client) VALUES
+(1, 1, 50000.00, '2026-01-15 00:00:00', 1), -- Trajet 1 standard
+(2, 1, 60000.00, '2026-01-15 00:00:00', 1), -- Trajet 1 VIP
+(3, 1, 75000.00, '2026-01-15 00:00:00', 1), -- Trajet 1 Premium
+(1, 2, 40000.00, '2026-01-15 00:00:00', 1), -- Trajet 2 standard
+(2, 2, 48000.00, '2026-01-15 00:00:00', 1), -- Trajet 2 VIP    
+(3, 2, 62500.00, '2026-01-15 00:00:00', 1), -- Trajet 2 Premium
+(1, 3, 60000.00, '2026-01-15 00:00:00', 1), -- Trajet 3 standard
+(2, 3, 72000.00, '2026-01-15 00:00:00', 1), -- Trajet 3 VIP
+(3, 3, 90000.00, '2026-01-15 00:00:00', 1), -- Trajet 3 Premium
+(1, 4, 50000.00, '2026-01-15 00:00:00', 1), -- Trajet 4 standard
+(2, 4, 60000.00, '2026-01-15 00:00:00', 1), -- Trajet 4 VIP
+(3, 4, 75000.00, '2026-01-15 00:00:00', 1), -- Trajet 4 Premium
+(1, 5, 70000.00, '2026-01-15 00:00:00', 1), -- Trajet 5 standard
+(2, 5, 84000.00, '2026-01-15 00:00:00', 1), -- Trajet 5 VIP
+(3, 5, 105000.00, '2026-01-15 00:00:00', 1); -- Trajet 5 Premium
+
+INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_client) VALUES
+(1, 1, 65000, '2026-01-16 00:00:00', 2),
+(2, 1, 50000, '2026-01-16 00:00:00', 2),
+(3, 1, 40000, '2026-01-16 00:00:00', 2);
+
+INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_client) VALUES
+(1, 1, 50000, '2026-01-16 00:00:00', 1),
+(2, 1, 70000, '2026-01-16 00:00:00', 1),
+(3, 1, 60000, '2026-01-16 00:00:00', 1);
+
+UPDATE place_tarif SET tarif = 55000  WHERE id_place_tarif = 68; 
+
+
+INSERT INTO reduction (id_type_client, reduction) VALUES
+(3, 20.0); -- Senior : 20% de réduction

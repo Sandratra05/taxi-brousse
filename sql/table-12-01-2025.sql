@@ -1,7 +1,7 @@
-\c postgres
-drop database taxi_brousse;
-create database taxi_brousse;
-\c taxi_brousse
+-- \c postgres
+-- drop database taxi_brousse;
+-- create database taxi_brousse;
+-- \c taxi_brousse
 -- Script de mise à jour : table-12-01-2025.sql
 -- Supprimer les tables obsolètes
 DROP TABLE IF EXISTS statut_paiement;
@@ -138,6 +138,12 @@ CREATE TABLE client(
    email VARCHAR(50),
    PRIMARY KEY(id_client)
 );
+
+CREATE TABLE type_client(
+   id_type_client SERIAL,
+   libelle VARCHAR(50) NOT NULL,
+   PRIMARY KEY(id_type_client)
+); 
 
 CREATE TABLE methode_paiement(
    id_methode_paiement SERIAL,
@@ -320,8 +326,18 @@ CREATE TABLE place_tarif (
     id_place_tarif SERIAL PRIMARY KEY,
     id_categorie INT NOT NULL,
     id_trajet INT NOT NULL,
+    id_type_client INT NOT NULL,
     tarif DECIMAL(15, 2) NOT NULL,
     date_tarif TIMESTAMP NOT NULL,
     FOREIGN KEY (id_categorie) REFERENCES categorie(id_categorie),
-    FOREIGN KEY (id_trajet) REFERENCES trajet(id_trajet)
+    FOREIGN KEY (id_trajet) REFERENCES trajet(id_trajet),
+    FOREIGN KEY (id_type_client) REFERENCES type_client(id_type_client)
+);
+
+CREATE TABLE reduction (
+   id_reduction SERIAL PRIMARY KEY,
+   id_type_client INT NOT NULL,
+   reduction DECIMAL(5,2) NOT NULL,
+   FOREIGN KEY (id_type_client) REFERENCES type_client(id_type_client)
+   
 );
