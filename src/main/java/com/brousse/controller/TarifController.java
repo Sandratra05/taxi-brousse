@@ -4,6 +4,7 @@ import com.brousse.dto.TarifDTO;
 import com.brousse.model.Categorie;
 import com.brousse.model.PlaceTarif;
 import com.brousse.model.Trajet;
+import com.brousse.model.TypeClient;
 import com.brousse.repository.CategorieRepository;
 import com.brousse.repository.PlaceTarifRepository;
 import com.brousse.repository.TrajetRepository;
@@ -77,26 +78,33 @@ public class TarifController {
                          @RequestParam String dateTarif,
                          @RequestParam BigDecimal tarifvip,
                          @RequestParam BigDecimal tarifpremium,
-                         @RequestParam BigDecimal tarifstandard
+                         @RequestParam BigDecimal tarifeconomique
+                        //  @RequestParam BigDecimal tarifvipenfant,
+                        //  @RequestParam BigDecimal tarifpremiumenfant
     ) {
         Trajet trajet = trajetRepository.findById(trajetId).orElse(null);
         LocalDateTime date = LocalDate.parse(dateTarif).atStartOfDay();
 
-        if (trajet != null && tarifvip != null && tarifstandard != null && tarifpremium != null) {
+        if (trajet != null && tarifvip != null && tarifeconomique != null && tarifpremium != null) { //&& tarifvipenfant != null && tarifpremiumenfant != null
 
             // Check if already exists for this trajet and date
             List<PlaceTarif> existing = placeTarifRepository.findByTrajet_Id(trajetId);
             boolean exists = existing.stream().anyMatch(pt -> pt.getDateTarif().toLocalDate().equals(date.toLocalDate()));
 
             if (!exists) {
+                TypeClient typeClient = new TypeClient();
+                typeClient.setId(1);
+
                 // === Enregistrement pour Standard ===
                 PlaceTarif placeTarifStandard = new PlaceTarif();
                 placeTarifStandard.setTrajet(trajet);
                 placeTarifStandard.setDateTarif(date);
+                
+                placeTarifStandard.setTypeClient(typeClient);
 
                 Categorie categorieStandard = categorieRepository.findById(1).orElse(null);
                 placeTarifStandard.setCategorie(categorieStandard);
-                placeTarifStandard.setTarif(tarifstandard);
+                placeTarifStandard.setTarif(tarifeconomique);
                 placeTarifRepository.save(placeTarifStandard);
 
                 // === Enregistrement pour VIP ===
@@ -104,15 +112,19 @@ public class TarifController {
                 placeTarifVIP.setTrajet(trajet);
                 placeTarifVIP.setDateTarif(date);
 
+                placeTarifVIP.setTypeClient(typeClient);
+
                 Categorie categorieVip = categorieRepository.findById(2).orElse(null);
                 placeTarifVIP.setCategorie(categorieVip);
                 placeTarifVIP.setTarif(tarifvip);
                 placeTarifRepository.save(placeTarifVIP);
-
+                
                 // === Enregistrement pour Premium ===
                 PlaceTarif placeTarifPremium = new PlaceTarif();
                 placeTarifPremium.setTrajet(trajet);
                 placeTarifPremium.setDateTarif(date);
+
+                placeTarifPremium.setTypeClient(typeClient);
 
                 Categorie categoriePremium = categorieRepository.findById(3).orElse(null);
                 placeTarifPremium.setCategorie(categoriePremium);
@@ -160,7 +172,8 @@ public class TarifController {
     public String edit(@PathVariable Integer trajetId, @PathVariable String dateStr,
                        @RequestParam BigDecimal tarifvip,
                        @RequestParam BigDecimal tarifpremium,
-                       @RequestParam BigDecimal tarifstandard) {
+                       @RequestParam BigDecimal tarifstandard
+                    ) {
         LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         Trajet trajet = trajetRepository.findById(trajetId).orElse(null);
 

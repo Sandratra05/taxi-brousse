@@ -22,6 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.persistence.criteria.Predicate;
+
+import java.math.BigDecimal;
 import java.util.*;
 
 @Controller
@@ -208,6 +210,8 @@ public class BilletController {
             @PathVariable Integer idVoyage,
             @RequestParam(value = "placesIds", required = false) List<Integer> placesIds,
             @RequestParam Integer clientId,
+            @RequestParam Integer nbEnfant,
+            @RequestParam Integer nbSenior,
             Model model
     ) {
         try {
@@ -216,7 +220,7 @@ public class BilletController {
             }
 
             // Créer une commande pour tous les billets
-            Integer commandeId = billetService.acheterBilletsEnCommande(idVoyage, placesIds, clientId);
+            Integer commandeId = billetService.acheterBilletsEnCommande(idVoyage, placesIds, clientId, nbEnfant, nbSenior);
 
             return "redirect:/billets/commande/" + commandeId;
         } catch (Exception e) {

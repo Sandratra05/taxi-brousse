@@ -35,6 +35,10 @@ public class PlaceTarif {
     @JoinColumn(name = "id_trajet", nullable = false)
     private Trajet trajet;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_type_client", nullable = false)
+    private TypeClient typeClient;
+
     @Column(name = "tarif", nullable = false, precision = 15, scale = 2)
     private BigDecimal tarif;
 
