@@ -2,6 +2,7 @@
 -- Inspiré de data-sandratra.sql, adapté au nouveau schéma
 
 -- Insertion des villes
+
 INSERT INTO ville (libelle) VALUES
 ('Antananarivo'),
 ('Toamasina'),
@@ -64,7 +65,7 @@ INSERT INTO vehicule (immatriculation, consommation_l_100km, id_vehicule_modele)
 ('3456-MAH', 14.0, 4);
 
 -- Insertion des places pour les véhicules (exemple pour le premier véhicule, 32 places)
-ALTER TABLE place ADD COLUMN IF NOT EXISTS id_categorie INTEGER;
+-- ALTER TABLE place ADD COLUMN IF NOT EXISTS id_categorie INTEGER;
 
 -- Mise à jour: on ajoute la colonne `id_categorie` (référence à `categorie`).
 -- Pour ces données d'exemple on renseigne `1` (Standard) par défaut.
@@ -317,16 +318,16 @@ INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_cli
 (3, 5, 105000.00, '2026-01-15 00:00:00', 1); -- Trajet 5 Premium
 
 INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_client) VALUES
-(1, 1, 65000, '2026-01-16 00:00:00', 2),
-(2, 1, 50000, '2026-01-16 00:00:00', 2),
-(3, 1, 40000, '2026-01-16 00:00:00', 2);
+(2, 1, 65000, '2026-01-17 00:00:00', 2),
+(3, 1, 50000, '2026-01-17 00:00:00', 2),
+(1, 1, 40000, '2026-01-17 00:00:00', 2);
 
 INSERT INTO place_tarif (id_categorie, id_trajet, tarif, date_tarif, id_type_client) VALUES
-(1, 1, 50000, '2026-01-16 00:00:00', 1),
-(2, 1, 70000, '2026-01-16 00:00:00', 1),
-(3, 1, 60000, '2026-01-16 00:00:00', 1);
+(1, 1, 55000, '2026-01-17 00:00:00', 1),
+(2, 1, 70000, '2026-01-17 00:00:00', 1),
+(3, 1, 60000, '2026-01-17 00:00:00', 1);
 
-UPDATE place_tarif SET tarif = 55000  WHERE id_place_tarif = 68; 
+-- UPDATE place_tarif SET tarif = 55000  WHERE id_place_tarif = 68;
 
 
 INSERT INTO reduction (id_type_client, reduction) VALUES
