@@ -34,7 +34,7 @@
             border-radius: 15px;
             padding: 30px;
             margin: 30px auto;
-            max-width: 400px;
+            max-width: 450px;
             position: relative;
         }
 
@@ -69,8 +69,8 @@
 
         /* Carré de place */
         .seat {
-            width: 70px;
-            height: 70px;
+            width: 90px;
+            height: 90px;
             border: 2px solid #95a5a6;
             border-radius: 8px;
             display: flex;
@@ -146,8 +146,8 @@
         }
 
         .legend-box {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 5px;
             border: 2px solid #95a5a6;
         }
@@ -321,8 +321,16 @@
                             th:text="${client.nom + ' ' + client.prenom}"></option>
                 </select>
             </label>
-        </div>
 
+            <label>Nombres Enfants:
+                <input type="number" name="nbEnfant" id="nombreEnfant">
+            </label>
+
+            <label>Nombres Senior:
+                <input type="number" name="nbSenior" id="nombreSenior">
+            </label>
+
+        </div>
 
         <!-- Disposition des places du véhicule -->
         <div class="vehicle-layout">
@@ -343,7 +351,7 @@
                            th:value="${info.place.id}"
                            th:disabled="${!info.disponible}"
                            th:id="'place-' + ${info.place.id}">
-                    <span class="seat-number" th:text="${info.place.numero}"></span>
+                    <span class="seat-number" th:text="${info.place.numero} + '-' + ${info.place.categorie.code} "></span>
                     <span th:if="${!info.disponible}" style="font-size: 10px; color: white;">🔒</span>
                 </div>
             </div>

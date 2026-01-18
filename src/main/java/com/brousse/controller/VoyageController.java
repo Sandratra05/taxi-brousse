@@ -167,29 +167,19 @@ public class VoyageController {
             Integer nbPremium = vehiculeService.countPlaceByVehiculeAndCategorie(vehId, 3);
 
             // Récupérer les tarifs applicables pour le trajet de ce voyage
-            // java.util.List<com.brousse.model.PlaceTarif> placeTarifs = placeTarifService.findByTrajetId(v.getTrajet() != null ? v.getTrajet().getId() : null);
             List<PlaceTarif> placeTarifs = placeTarifRepository.findAll();
             java.util.Map<String, Integer> tarifs = voyageService.getTarif(v, placeTarifs);
 
-                Integer tarifStandard = tarifs.getOrDefault("Standard", 0);
-                Integer tarifVip = tarifs.getOrDefault("VIP", 0);
-                Integer tarifPremium = tarifs.getOrDefault("Premium", 0);
+            Integer tarifStandard = tarifs.getOrDefault("Standard", 0);
+            Integer tarifVip = tarifs.getOrDefault("VIP", 0);
+            Integer tarifPremium = tarifs.getOrDefault("Premium", 0);
 
-                // System.out.println("Tarif Standard: " + tarifStandard);
-                // System.out.println("Nb Standard: " + nbStandard);
-                // System.out.println("Tarif VIP: " + tarifVip);
-                // System.out.println("Nb VIP: " + nbVip);
-                // System.out.println("Tarif Premium: " + tarifPremium);
-                // System.out.println("Nb Premium: " + nbPremium);
-
-                double revenueMax = (nbVip != null ? nbVip : 0) * tarifVip
-                    + (nbStandard != null ? nbStandard : 0) * tarifStandard
-                    + (nbPremium != null ? nbPremium : 0) * tarifPremium;
+            double revenue = billetService.getBilletsByVoyage(v.getId()).stream().mapToDouble(b -> b.getMontantTotal().doubleValue()).sum();
 
             places.put("standard", nbStandard);
             places.put("vip", nbVip);
             places.put("premium", nbPremium);
-            places.put("revenueMax", revenueMax);
+            places.put("revenueMax", revenue);
 
             placesParCategorie.put(v.getId(), places);
         }
