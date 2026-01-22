@@ -340,45 +340,94 @@ INSERT INTO societe (nom, adresse, telephone, email) VALUES
 -- ('Sponsor Malagasy', 'Rue du Sponsor, Fianarantsoa', '+261343456789', 'hello@sponsor.mg');
 
 
-INSERT INTO publicite (date_diffusion, id_vehicule, id_societe, est_paye) VALUES
-('2025-12-01 08:00:00', 1, 1, FALSE),
-('2025-12-02 08:00:00', 2, 1, FALSE),
-('2025-12-03 08:00:00', 3, 1, FALSE),
-('2025-12-04 08:00:00', 4, 1, FALSE),
-('2025-12-05 08:00:00', 1, 1, FALSE),
-('2025-12-06 08:00:00', 2, 1, FALSE),
-('2025-12-07 08:00:00', 3, 1, FALSE),
-('2025-12-08 08:00:00', 4, 1, FALSE),
-('2025-12-09 08:00:00', 1, 1, FALSE),
-('2025-12-10 08:00:00', 2, 1, FALSE),
--- Vaniala (10 diffusions)
-('2025-12-11 08:00:00', 3, 1, FALSE),
-('2025-12-12 08:00:00', 4, 1, FALSE),
-('2025-12-13 08:00:00', 1, 1, FALSE),
-
-('2025-12-14 08:00:00', 2, 1, FALSE),
-('2025-12-15 08:00:00', 3, 1, FALSE),
-('2025-12-16 08:00:00', 4, 1, FALSE),
-('2025-12-17 08:00:00', 1, 1, FALSE),
-('2025-12-18 08:00:00', 2, 1, FALSE),
-('2025-12-19 08:00:00', 3, 1, FALSE),
-('2025-12-20 08:00:00', 4, 1, FALSE),
-
--- Lewis (10 diffusions)
-('2025-12-21 08:00:00', 1, 2, FALSE),
-('2025-12-22 08:00:00', 2, 2, FALSE),
-('2025-12-23 08:00:00', 3, 2, FALSE),
-('2025-12-24 08:00:00', 4, 2, FALSE),
-('2025-12-25 08:00:00', 1, 2, FALSE),
-('2025-12-26 08:00:00', 2, 2, FALSE),
-('2025-12-27 08:00:00', 3, 2, FALSE),
-('2025-12-28 08:00:00', 4, 2, FALSE),
-('2025-12-29 08:00:00', 1, 2, FALSE),
-('2025-12-30 08:00:00', 2, 2, FALSE);
+-- INSERT INTO publicite (date_diffusion, id_vehicule, id_societe, est_paye) VALUES
+-- ('2025-12-01 08:00:00', 1, 1, FALSE),
+-- ('2025-12-02 08:00:00', 2, 1, FALSE),
+-- ('2025-12-03 08:00:00', 3, 1, FALSE),
+-- ('2025-12-04 08:00:00', 4, 1, FALSE),
+-- ('2025-12-05 08:00:00', 1, 1, FALSE),
+-- ('2025-12-06 08:00:00', 2, 1, FALSE),
+-- ('2025-12-07 08:00:00', 3, 1, FALSE),
+-- ('2025-12-08 08:00:00', 4, 1, FALSE),
+-- ('2025-12-09 08:00:00', 1, 1, FALSE),
+-- ('2025-12-10 08:00:00', 2, 1, FALSE),
+-- -- Vaniala (10 diffusions)
+-- ('2025-12-11 08:00:00', 3, 1, FALSE),
+-- ('2025-12-12 08:00:00', 4, 1, FALSE),
+-- ('2025-12-13 08:00:00', 1, 1, FALSE),
+--
+-- ('2025-12-14 08:00:00', 2, 1, FALSE),
+-- ('2025-12-15 08:00:00', 3, 1, FALSE),
+-- ('2025-12-16 08:00:00', 4, 1, FALSE),
+-- ('2025-12-17 08:00:00', 1, 1, FALSE),
+-- ('2025-12-18 08:00:00', 2, 1, FALSE),
+-- ('2025-12-19 08:00:00', 3, 1, FALSE),
+-- ('2025-12-20 08:00:00', 4, 1, FALSE),
+--
+-- -- Lewis (10 diffusions)
+-- ('2025-12-21 08:00:00', 1, 2, FALSE),
+-- ('2025-12-22 08:00:00', 2, 2, FALSE),
+-- ('2025-12-23 08:00:00', 3, 2, FALSE),
+-- ('2025-12-24 08:00:00', 4, 2, FALSE),
+-- ('2025-12-25 08:00:00', 1, 2, FALSE),
+-- ('2025-12-26 08:00:00', 2, 2, FALSE),
+-- ('2025-12-27 08:00:00', 3, 2, FALSE),
+-- ('2025-12-28 08:00:00', 4, 2, FALSE),
+-- ('2025-12-29 08:00:00', 1, 2, FALSE),
+-- ('2025-12-30 08:00:00', 2, 2, FALSE);
 
 INSERT INTO tarif_publicite (montant, date_tarif) VALUES (100000, NOW());
---
--- UPDATE publicite SET est_paye = true WHERE id_publicite <= 10;
---
--- UPDATE publicite SET est_paye = true WHERE id_publicite > 10 && id_publicite <= 12;
+
+-- Insertion des publicités (table publicite : id, nom, id_societe)
+-- Vaniala (id_societe = 1)
+INSERT INTO publicite (nom, id_societe) VALUES
+('Pub Vaniala - Boisson', 1),
+('Pub Vaniala - Snack', 1),
+('Pub Vaniala - Promo Été', 1);
+
+-- Lewis (id_societe = 2)
+INSERT INTO publicite (nom, id_societe) VALUES
+('Pub Lewis - Mode', 2),
+('Pub Lewis - Accessoires', 2);
+
+-- Insertion des diffusions de publicités (table publicite_diffusion)
+-- 20 diffusions pour Vaniala (id_societe = 1, publicites id 1, 2, 3)
+-- 10 diffusions pour Lewis (id_societe = 2, publicites id 4, 5)
+-- Toutes les diffusions sont non payées (est_paye = FALSE)
+-- Voyages disponibles : 1, 2, 3, 4
+
+INSERT INTO publicite_diffusion (date_diffusion, id_publicite, est_paye, id_voyage) VALUES
+-- Vaniala - 20 diffusions
+('2026-01-05 08:00:00', 1, FALSE, 1),
+('2026-01-06 09:00:00', 1, FALSE, 2),
+('2026-01-07 10:00:00', 2, FALSE, 3),
+('2026-01-08 11:00:00', 2, FALSE, 4),
+('2026-01-09 08:00:00', 3, FALSE, 1),
+('2026-01-10 09:00:00', 1, FALSE, 2),
+('2026-01-11 10:00:00', 1, FALSE, 3),
+('2026-01-12 11:00:00', 2, FALSE, 4),
+('2026-01-13 08:00:00', 2, FALSE, 1),
+('2026-01-14 09:00:00', 3, FALSE, 2),
+('2026-01-15 10:00:00', 3, FALSE, 3),
+('2026-01-16 11:00:00', 1, FALSE, 4),
+('2026-01-17 08:00:00', 1, FALSE, 1),
+('2026-01-18 09:00:00', 2, FALSE, 2),
+('2026-01-19 10:00:00', 2, FALSE, 3),
+('2026-01-20 11:00:00', 3, FALSE, 4),
+('2026-01-21 08:00:00', 3, FALSE, 1),
+('2026-01-22 09:00:00', 1, FALSE, 2),
+('2026-01-23 10:00:00', 2, FALSE, 3),
+('2026-01-24 11:00:00', 3, FALSE, 4),
+
+-- Lewis - 10 diffusions
+('2026-01-05 08:30:00', 4, FALSE, 1),
+('2026-01-06 09:30:00', 4, FALSE, 2),
+('2026-01-07 10:30:00', 5, FALSE, 3),
+('2026-01-08 11:30:00', 5, FALSE, 4),
+('2026-01-09 08:30:00', 4, FALSE, 1),
+('2026-01-10 09:30:00', 4, FALSE, 2),
+('2026-01-11 10:30:00', 5, FALSE, 3),
+('2026-01-12 11:30:00', 5, FALSE, 4),
+('2026-01-13 08:30:00', 4, FALSE, 1),
+('2026-01-14 09:30:00', 5, FALSE, 2);
 

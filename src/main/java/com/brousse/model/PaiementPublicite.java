@@ -24,8 +24,8 @@ public class PaiementPublicite {
     private LocalDateTime datePaiement;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_publicite", nullable = false)
-    private Publicite publicite;
+    @JoinColumn(name = "id_publicite_diffusion", nullable = false)
+    private PubliciteDiffusion publiciteDiffusion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_methode_paiement", nullable = false)
