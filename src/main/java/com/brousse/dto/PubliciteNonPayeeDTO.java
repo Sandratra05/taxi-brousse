@@ -5,14 +5,16 @@ import java.time.LocalDateTime;
 public class PubliciteNonPayeeDTO {
     private Integer id;
     private LocalDateTime dateDiffusion;
-    private String vehiculeImmatriculation;
+    private String publiciteNom;
+    private String voyageInfo;
 
     public PubliciteNonPayeeDTO() {}
 
-    public PubliciteNonPayeeDTO(Integer id, LocalDateTime dateDiffusion, String vehiculeImmatriculation) {
+    public PubliciteNonPayeeDTO(Integer id, LocalDateTime dateDiffusion, String publiciteNom, String voyageInfo) {
         this.id = id;
         this.dateDiffusion = dateDiffusion;
-        this.vehiculeImmatriculation = vehiculeImmatriculation;
+        this.publiciteNom = publiciteNom;
+        this.voyageInfo = voyageInfo;
     }
 
     public Integer getId() {
@@ -31,12 +33,20 @@ public class PubliciteNonPayeeDTO {
         this.dateDiffusion = dateDiffusion;
     }
 
-    public String getVehiculeImmatriculation() {
-        return vehiculeImmatriculation;
+    public String getPubliciteNom() {
+        return publiciteNom;
     }
 
-    public void setVehiculeImmatriculation(String vehiculeImmatriculation) {
-        this.vehiculeImmatriculation = vehiculeImmatriculation;
+    public void setPubliciteNom(String publiciteNom) {
+        this.publiciteNom = publiciteNom;
+    }
+
+    public String getVoyageInfo() {
+        return voyageInfo;
+    }
+
+    public void setVoyageInfo(String voyageInfo) {
+        this.voyageInfo = voyageInfo;
     }
 }
 

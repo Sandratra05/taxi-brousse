@@ -3,12 +3,12 @@ package com.brousse.controller;
 import com.brousse.dto.PubliciteNonPayeeDTO;
 import com.brousse.model.MethodePaiement;
 import com.brousse.model.PaiementPublicite;
-import com.brousse.model.Publicite;
+import com.brousse.model.PubliciteDiffusion;
 import com.brousse.model.Societe;
 import com.brousse.repository.MethodePaiementRepository;
-import com.brousse.repository.PubliciteRepository;
-import com.brousse.repository.SocieteRepository;
 import com.brousse.repository.PaiementPubliciteRepository;
+import com.brousse.repository.PubliciteDiffusionRepository;
+import com.brousse.repository.SocieteRepository;
 import com.brousse.service.TarifPubliciteService;
 
 import org.springframework.http.ResponseEntity;
@@ -29,41 +29,41 @@ import java.util.stream.IntStream;
 @RequestMapping("/publicites")
 public class PubliciteController {
 
-    private final PubliciteRepository publiciteRepository;
     private final SocieteRepository societeRepository;
+    private final PubliciteDiffusionRepository publiciteDiffusionRepository;
     private final PaiementPubliciteRepository paiementPubliciteRepository;
     private final TarifPubliciteService tarifPubliciteService;
     private final MethodePaiementRepository methodePaiementRepository;
 
-    public PubliciteController(PubliciteRepository publiciteRepository,
-                               SocieteRepository societeRepository,
+    public PubliciteController(SocieteRepository societeRepository,
+                               PubliciteDiffusionRepository publiciteDiffusionRepository,
                                PaiementPubliciteRepository paiementPubliciteRepository,
                                TarifPubliciteService tarifPubliciteService,
                                MethodePaiementRepository methodePaiementRepository) {
-        this.publiciteRepository = publiciteRepository;
         this.societeRepository = societeRepository;
+        this.publiciteDiffusionRepository = publiciteDiffusionRepository;
         this.paiementPubliciteRepository = paiementPubliciteRepository;
         this.tarifPubliciteService = tarifPubliciteService;
         this.methodePaiementRepository = methodePaiementRepository;
     }
 
-    // Liste des publicités avec montants payés par société
+    // Liste des diffusions avec montants payés par société
     @GetMapping
     public String list(
             @RequestParam(required = false) Integer anneeDiffusion,
             @RequestParam(required = false) Integer moisDiffusion,
             Model model) {
 
-        // Récupère toutes les publicités puis applique un filtre année/mois si fournis
-        List<Publicite> publicites = publiciteRepository.findAll();
+        // Récupère toutes les diffusions puis applique un filtre année/mois si fournis
+        List<PubliciteDiffusion> diffusions = publiciteDiffusionRepository.findAll();
         if (anneeDiffusion != null) {
-            publicites = publicites.stream()
-                    .filter(p -> p.getDateDiffusion() != null && p.getDateDiffusion().getYear() == anneeDiffusion)
+            diffusions = diffusions.stream()
+                    .filter(d -> d.getDateDiffusion() != null && d.getDateDiffusion().getYear() == anneeDiffusion)
                     .toList();
         }
         if (moisDiffusion != null) {
-            publicites = publicites.stream()
-                    .filter(p -> p.getDateDiffusion() != null && p.getDateDiffusion().getMonthValue() == moisDiffusion)
+            diffusions = diffusions.stream()
+                    .filter(d -> d.getDateDiffusion() != null && d.getDateDiffusion().getMonthValue() == moisDiffusion)
                     .toList();
         }
 
@@ -73,51 +73,45 @@ public class PubliciteController {
         // Récupérer le tarif actuel
         BigDecimal tarifActuel = tarifPubliciteService.getMontantTarifActuel();
 
-        // Construire la map societeId -> montant total payé (depuis paiement_publicite)
+        // Construire les maps par société
         Map<Integer, BigDecimal> totalPayeSociete = new HashMap<>();
-
-        // Construire la map societeId -> nombre de publicités
-        Map<Integer, Long> nombrePublicitesSociete = new HashMap<>();
-
-        // Construire la map societeId -> nombre de publicités payées (est_paye = true)
-        Map<Integer, Long> nombrePublicitesPayeesSociete = new HashMap<>();
-
-        // Construire la map societeId -> montant total à payer (nombre de pubs * tarif)
+        Map<Integer, Long> nombreDiffusionsSociete = new HashMap<>();
+        Map<Integer, Long> nombreDiffusionsPayeesSociete = new HashMap<>();
         Map<Integer, BigDecimal> totalAPayerSociete = new HashMap<>();
-
-        // Construire la map societeId -> reste à payer
         Map<Integer, BigDecimal> resteAPayerSociete = new HashMap<>();
 
         // Variable pour calculer le CA total
-        long nombreTotalPubs = 0;
+        long nombreTotalDiffusions = 0;
 
         for (Societe s : societes) {
             Integer sid = s.getId();
 
-            // Filtrer les publicités de cette société selon les critères année/mois
-            List<Publicite> publicitesFiltered = publicites.stream()
-                    .filter(p -> p.getSociete() != null && p.getSociete().getId().equals(sid))
+            // Filtrer les diffusions de cette société selon les critères année/mois
+            List<PubliciteDiffusion> diffusionsFiltered = diffusions.stream()
+                    .filter(d -> d.getPublicite() != null &&
+                                 d.getPublicite().getSociete() != null &&
+                                 d.getPublicite().getSociete().getId().equals(sid))
                     .toList();
 
-            // Nombre total de publicités pour cette société
-            long nombrePubs = publicitesFiltered.size();
-            nombrePublicitesSociete.put(sid, nombrePubs);
-            nombreTotalPubs += nombrePubs;
+            // Nombre total de diffusions pour cette société
+            long nombreDiffusions = diffusionsFiltered.size();
+            nombreDiffusionsSociete.put(sid, nombreDiffusions);
+            nombreTotalDiffusions += nombreDiffusions;
 
-            // Nombre de publicités payées (est_paye = true)
-            long nombrePayees = publicitesFiltered.stream()
-                    .filter(p -> Boolean.TRUE.equals(p.getEstPaye()))
+            // Nombre de diffusions payées (est_paye = true)
+            long nombrePayees = diffusionsFiltered.stream()
+                    .filter(d -> Boolean.TRUE.equals(d.getEstPaye()))
                     .count();
-            nombrePublicitesPayeesSociete.put(sid, nombrePayees);
+            nombreDiffusionsPayeesSociete.put(sid, nombrePayees);
 
-            // Montant total à payer = nombre de pubs * tarif actuel
-            BigDecimal totalAPayer = tarifActuel.multiply(BigDecimal.valueOf(nombrePubs));
+            // Montant total à payer = nombre de diffusions * tarif actuel
+            BigDecimal totalAPayer = tarifActuel.multiply(BigDecimal.valueOf(nombreDiffusions));
             totalAPayerSociete.put(sid, totalAPayer);
 
             // Calculer le montant total payé depuis paiement_publicite
             BigDecimal totalPaye = BigDecimal.ZERO;
-            for (Publicite p : publicitesFiltered) {
-                BigDecimal montantPaye = paiementPubliciteRepository.sumMontantByPubliciteId(p.getId());
+            for (PubliciteDiffusion d : diffusionsFiltered) {
+                BigDecimal montantPaye = paiementPubliciteRepository.sumMontantByDiffusionId(d.getId());
                 totalPaye = totalPaye.add(montantPaye != null ? montantPaye : BigDecimal.ZERO);
             }
             totalPayeSociete.put(sid, totalPaye);
@@ -127,14 +121,14 @@ public class PubliciteController {
             resteAPayerSociete.put(sid, resteAPayer.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : resteAPayer);
         }
 
-        // CA = nombre total de publicités * tarif
-        BigDecimal chiffreAffaires = tarifActuel.multiply(BigDecimal.valueOf(nombreTotalPubs));
+        // CA = nombre total de diffusions * tarif
+        BigDecimal chiffreAffaires = tarifActuel.multiply(BigDecimal.valueOf(nombreTotalDiffusions));
 
         // Générer la liste des années (de 2020 à l'année actuelle + 1)
         int currentYear = LocalDateTime.now().getYear();
         List<Integer> annees = IntStream.rangeClosed(2020, currentYear + 1)
                 .boxed()
-                .sorted((a, b) -> b - a) // Tri décroissant
+                .sorted((a, b) -> b - a)
                 .collect(Collectors.toList());
 
         model.addAttribute("annees", annees);
@@ -143,8 +137,8 @@ public class PubliciteController {
         model.addAttribute("totalPayeSociete", totalPayeSociete);
         model.addAttribute("totalAPayerSociete", totalAPayerSociete);
         model.addAttribute("resteAPayerSociete", resteAPayerSociete);
-        model.addAttribute("nombrePublicitesSociete", nombrePublicitesSociete);
-        model.addAttribute("nombrePublicitesPayeesSociete", nombrePublicitesPayeesSociete);
+        model.addAttribute("nombreDiffusionsSociete", nombreDiffusionsSociete);
+        model.addAttribute("nombreDiffusionsPayeesSociete", nombreDiffusionsPayeesSociete);
         model.addAttribute("societes", societes);
         model.addAttribute("anneeDiffusion", anneeDiffusion);
         model.addAttribute("moisDiffusion", moisDiffusion);
@@ -152,7 +146,7 @@ public class PubliciteController {
         return "publicites/list";
     }
 
-    // Formulaire de paiement des publicités
+    // Formulaire de paiement des diffusions
     @GetMapping("/paiement")
     public String paiementForm(Model model) {
         List<Societe> societes = societeRepository.findAll();
@@ -166,28 +160,30 @@ public class PubliciteController {
         return "publicites/paiement-form";
     }
 
-    // API pour récupérer les publicités non payées d'une société
+    // API pour récupérer les diffusions non payées d'une société
     @GetMapping("/api/non-payees/{societeId}")
     @ResponseBody
-    public ResponseEntity<List<PubliciteNonPayeeDTO>> getPublicitesNonPayees(@PathVariable Integer societeId) {
-        List<Publicite> publicites = publiciteRepository.findBySociete_IdAndEstPayeFalse(societeId);
+    public ResponseEntity<List<PubliciteNonPayeeDTO>> getDiffusionsNonPayees(@PathVariable Integer societeId) {
+        List<PubliciteDiffusion> diffusions = publiciteDiffusionRepository.findByPublicite_Societe_IdAndEstPayeFalse(societeId);
 
-        List<PubliciteNonPayeeDTO> dtos = publicites.stream()
-                .map(p -> new PubliciteNonPayeeDTO(
-                        p.getId(),
-                        p.getDateDiffusion(),
-                        p.getVehicule().getImmatriculation()
+        List<PubliciteNonPayeeDTO> dtos = diffusions.stream()
+                .map(d -> new PubliciteNonPayeeDTO(
+                        d.getId(),
+                        d.getDateDiffusion(),
+                        d.getPublicite().getNom(),
+                        d.getVoyage().getVehicule().getImmatriculation() + " - " +
+                        d.getVoyage().getTrajet().getGareDepart().getVille().getLibelle() + " → " +
+                        d.getVoyage().getTrajet().getGareArrivee().getVille().getLibelle()
                 ))
                 .toList();
 
         return ResponseEntity.ok(dtos);
     }
 
-    // Traitement du paiement des publicités
+    // Traitement du paiement des diffusions
     @PostMapping("/paiement")
     public String processPaiement(
-            @RequestParam Integer societeId,
-            @RequestParam List<Integer> publiciteIds,
+            @RequestParam List<Integer> diffusionIds,
             @RequestParam String datePaiement,
             @RequestParam Integer methodePaiementId,
             RedirectAttributes redirectAttributes) {
@@ -203,26 +199,26 @@ public class PubliciteController {
             // Parser la date
             LocalDateTime dateTime = LocalDateTime.parse(datePaiement);
 
-            // Traiter chaque publicité sélectionnée
-            for (Integer publiciteId : publiciteIds) {
-                Publicite publicite = publiciteRepository.findById(publiciteId)
-                        .orElseThrow(() -> new RuntimeException("Publicité non trouvée: " + publiciteId));
+            // Traiter chaque diffusion sélectionnée
+            for (Integer diffusionId : diffusionIds) {
+                PubliciteDiffusion diffusion = publiciteDiffusionRepository.findById(diffusionId)
+                        .orElseThrow(() -> new RuntimeException("Diffusion non trouvée: " + diffusionId));
 
                 // Créer le paiement
                 PaiementPublicite paiement = new PaiementPublicite();
                 paiement.setMontant(tarifActuel);
                 paiement.setDatePaiement(dateTime);
-                paiement.setPublicite(publicite);
+                paiement.setPubliciteDiffusion(diffusion);
                 paiement.setMethodePaiement(methodePaiement);
                 paiementPubliciteRepository.save(paiement);
 
-                // Mettre à jour le statut de la publicité
-                publicite.setEstPaye(true);
-                publiciteRepository.save(publicite);
+                // Mettre à jour le statut de la diffusion
+                diffusion.setEstPaye(true);
+                publiciteDiffusionRepository.save(diffusion);
             }
 
             redirectAttributes.addFlashAttribute("success",
-                    publiciteIds.size() + " publicité(s) payée(s) avec succès");
+                    diffusionIds.size() + " diffusion(s) payée(s) avec succès");
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error",

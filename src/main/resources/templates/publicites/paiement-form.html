@@ -124,11 +124,11 @@
         </div>
 
         <div id="publicitesContainer" class="publicites-list">
-            <h3>Publicités non payées</h3>
+            <h3>Diffusions non payées</h3>
 
             <div id="loadingMessage" style="display: none;">Chargement...</div>
             <div id="noPublicitesMessage" class="no-publicites" style="display: none;">
-                Aucune publicité non payée pour cette société.
+                Aucune diffusion non payée pour cette société.
             </div>
 
             <div id="publicitesTableContainer" style="display: none;">
@@ -142,8 +142,9 @@
                     <thead>
                         <tr>
                             <th style="width: 50px;">Sélection</th>
+                            <th>Publicité</th>
                             <th>Date Diffusion</th>
-                            <th>Véhicule</th>
+                            <th>Voyage</th>
                             <th>Montant</th>
                         </tr>
                     </thead>
@@ -154,7 +155,7 @@
         </div>
 
         <div id="totalSection" class="total-section">
-            <p>Nombre de publicités sélectionnées : <strong id="nbSelected">0</strong></p>
+            <p>Nombre de diffusions sélectionnées : <strong id="nbSelected">0</strong></p>
             <p>Total à payer : <span class="total-value" id="totalAPayer">0 AR</span></p>
 
             <div class="form-group" style="margin-top: 15px;">
@@ -214,7 +215,7 @@
             loadPublicitesNonPayees(societeId);
         });
 
-        // Charger les publicités non payées
+        // Charger les diffusions non payées
         function loadPublicitesNonPayees(societeId) {
             publicitesContainer.classList.add('visible');
             loadingMessage.style.display = 'block';
@@ -239,23 +240,24 @@
                 .catch(error => {
                     loadingMessage.style.display = 'none';
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement des publicités');
+                    alert('Erreur lors du chargement des diffusions');
                 });
         }
 
-        // Afficher les publicités dans le tableau
-        function renderPublicites(publicites) {
+        // Afficher les diffusions dans le tableau
+        function renderPublicites(diffusions) {
             publicitesTableBody.innerHTML = '';
             selectAll.checked = false;
 
-            publicites.forEach(pub => {
+            diffusions.forEach(diff => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        <input type="checkbox" name="publiciteIds" value="${pub.id}" class="pub-checkbox">
+                        <input type="checkbox" name="diffusionIds" value="${diff.id}" class="pub-checkbox">
                     </td>
-                    <td>${formatDate(pub.dateDiffusion)}</td>
-                    <td>${pub.vehiculeImmatriculation}</td>
+                    <td>${diff.publiciteNom}</td>
+                    <td>${formatDate(diff.dateDiffusion)}</td>
+                    <td>${diff.voyageInfo}</td>
                     <td>${formatMontant(tarifPublicite)} AR</td>
                 `;
                 publicitesTableBody.appendChild(tr);
@@ -313,7 +315,7 @@
             const checkedBoxes = document.querySelectorAll('.pub-checkbox:checked');
             if (checkedBoxes.length === 0) {
                 e.preventDefault();
-                alert('Veuillez sélectionner au moins une publicité');
+                alert('Veuillez sélectionner au moins une diffusion');
                 return;
             }
 

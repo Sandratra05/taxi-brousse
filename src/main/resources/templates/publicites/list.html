@@ -94,8 +94,8 @@
         <thead>
         <tr>
             <th>Société</th>
-            <th class="text-right">Nb Publicités</th>
-            <th class="text-right">Nb Publicités Payées</th>
+            <th class="text-right">Nb Diffusions</th>
+            <th class="text-right">Nb Diffusions Payées</th>
             <th class="text-right">Total à Payer</th>
             <th class="text-right">Total Payé</th>
             <th class="text-right">Reste à Payer</th>
@@ -104,8 +104,8 @@
         <tbody>
             <tr th:each="s : ${societes}">
                 <td><strong th:text="${s.nom}"></strong></td>
-                <td class="text-right" th:text="${nombrePublicitesSociete[s.id] ?: 0}"></td>
-                <td class="text-right" th:text="${nombrePublicitesPayeesSociete[s.id] ?: 0}"></td>
+                <td class="text-right" th:text="${nombreDiffusionsSociete[s.id] ?: 0}"></td>
+                <td class="text-right" th:text="${nombreDiffusionsPayeesSociete[s.id] ?: 0}"></td>
                 <td class="text-right text-warning" th:text="${#numbers.formatDecimal((totalAPayerSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
                 <td class="text-right text-success" th:text="${#numbers.formatDecimal((totalPayeSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
                 <td class="text-right text-danger" th:text="${#numbers.formatDecimal((resteAPayerSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>

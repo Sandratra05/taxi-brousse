@@ -13,20 +13,20 @@ import java.util.List;
 @Repository
 public interface PaiementPubliciteRepository extends JpaRepository<PaiementPublicite, Integer>, JpaSpecificationExecutor<PaiementPublicite> {
 
-    List<PaiementPublicite> findByPublicite_Id(Integer idPublicite);
+    List<PaiementPublicite> findByPubliciteDiffusion_Id(Integer diffusionId);
 
-    List<PaiementPublicite> findByPublicite_Societe_Id(Integer idSociete);
+    List<PaiementPublicite> findByPubliciteDiffusion_Publicite_Societe_Id(Integer societeId);
 
-    @Query("SELECT COALESCE(SUM(pp.montant), 0) FROM PaiementPublicite pp WHERE pp.publicite.societe.id = :societeId")
+    @Query("SELECT COALESCE(SUM(pp.montant), 0) FROM PaiementPublicite pp WHERE pp.publiciteDiffusion.publicite.societe.id = :societeId")
     BigDecimal sumMontantBySocieteId(@Param("societeId") Integer societeId);
 
-    @Query("SELECT COALESCE(SUM(pp.montant), 0) FROM PaiementPublicite pp WHERE pp.publicite.id = :publiciteId")
-    BigDecimal sumMontantByPubliciteId(@Param("publiciteId") Integer publiciteId);
+    @Query("SELECT COALESCE(SUM(pp.montant), 0) FROM PaiementPublicite pp WHERE pp.publiciteDiffusion.id = :diffusionId")
+    BigDecimal sumMontantByDiffusionId(@Param("diffusionId") Integer diffusionId);
 
     @Query("SELECT COALESCE(SUM(pp.montant), 0) FROM PaiementPublicite pp " +
-           "WHERE pp.publicite.societe.id = :societeId " +
-           "AND EXTRACT(YEAR FROM pp.publicite.dateDiffusion) = :annee " +
-           "AND EXTRACT(MONTH FROM pp.publicite.dateDiffusion) = :mois")
+           "WHERE pp.publiciteDiffusion.publicite.societe.id = :societeId " +
+           "AND EXTRACT(YEAR FROM pp.publiciteDiffusion.dateDiffusion) = :annee " +
+           "AND EXTRACT(MONTH FROM pp.publiciteDiffusion.dateDiffusion) = :mois")
     BigDecimal sumMontantBySocieteIdAndAnneeMois(@Param("societeId") Integer societeId,
                                                   @Param("annee") Integer annee,
                                                   @Param("mois") Integer mois);
