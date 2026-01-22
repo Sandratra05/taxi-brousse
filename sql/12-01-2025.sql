@@ -351,9 +351,11 @@ INSERT INTO publicite (date_diffusion, cout, id_vehicule, id_societe) VALUES
 ('2025-12-08 08:00:00', 100000.00, 4, 1),
 ('2025-12-09 08:00:00', 100000.00, 1, 1),
 ('2025-12-10 08:00:00', 100000.00, 2, 1),
+-- Vaniala (10 diffusions)
 ('2025-12-11 08:00:00', 100000.00, 3, 1),
 ('2025-12-12 08:00:00', 100000.00, 4, 1),
 ('2025-12-13 08:00:00', 100000.00, 1, 1),
+
 ('2025-12-14 08:00:00', 100000.00, 2, 1),
 ('2025-12-15 08:00:00', 100000.00, 3, 1),
 ('2025-12-16 08:00:00', 100000.00, 4, 1),
@@ -373,3 +375,8 @@ INSERT INTO publicite (date_diffusion, cout, id_vehicule, id_societe) VALUES
 ('2025-12-28 08:00:00', 100000.00, 4, 2),
 ('2025-12-29 08:00:00', 100000.00, 1, 2),
 ('2025-12-30 08:00:00', 100000.00, 2, 2);
+
+UPDATE publicite SET est_paye = true WHERE id_publicite <= 10;
+
+UPDATE publicite SET est_paye = true WHERE id_publicite > 10 && id_publicite <= 12;
+
