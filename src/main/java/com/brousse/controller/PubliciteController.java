@@ -59,12 +59,33 @@ public class PubliciteController {
             totalCoutSociete.merge(sid, p.getCout(), BigDecimal::add);
         }
 
+        Map<Integer, BigDecimal> totalCoutSocietePaye = new HashMap<>();
+        for (Publicite p : publicites) {
+            if (p.getSociete() == null || p.getCout() == null || p.getEstPaye() == null || !p.getEstPaye()) continue;
+            Integer sid = p.getSociete().getId();
+
+            totalCoutSocietePaye.merge(sid, p.getCout(), BigDecimal::add);
+        }
+
+        Map<Integer, BigDecimal> totalCoutSocieteReste = new HashMap<>();
+        
         // Liste des sociétés pour l'affichage
         List<Societe> societes = societeRepository.findAll();
+
+        // Calculer le reste à payer par société = total - payé
+        for (Societe s : societes) {
+            Integer sid = s.getId();
+            BigDecimal total = totalCoutSociete.getOrDefault(sid, BigDecimal.ZERO);
+            BigDecimal paye = totalCoutSocietePaye.getOrDefault(sid, BigDecimal.ZERO);
+            BigDecimal reste = total.subtract(paye);
+            totalCoutSocieteReste.put(sid, reste);
+        }
         BigDecimal totalCout = publiciteService.totalCout(publicites);
 
         model.addAttribute("totalCout", totalCout);
         model.addAttribute("totalCoutSociete", totalCoutSociete);
+        model.addAttribute("totalCoutSocietePaye", totalCoutSocietePaye);
+        model.addAttribute("totalCoutSocieteReste", totalCoutSocieteReste);
         model.addAttribute("societes", societes);
         return "publicites/list";
     }

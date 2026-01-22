@@ -31,4 +31,7 @@ public class Publicite {
     @JoinColumn(name = "id_societe", nullable = false)
     private Societe societe;
 
+    @Column(name = "est_paye", nullable = false)
+    private Boolean estPaye;
+
 }
