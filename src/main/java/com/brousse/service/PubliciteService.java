@@ -1,6 +1,8 @@
 package com.brousse.service;
 
+import com.brousse.model.PaiementPublicite;
 import com.brousse.model.Publicite;
+import com.brousse.repository.PaiementPubliciteRepository;
 import com.brousse.repository.PubliciteRepository;
 import com.brousse.repository.SocieteRepository;
 
@@ -18,10 +20,14 @@ import com.brousse.model.Societe;
 public class PubliciteService {
     private final PubliciteRepository publiciteRepository;
     private final SocieteRepository societeRepository;
+    private final PaiementPubliciteRepository paiementPubliciteRepository;
 
-    public PubliciteService(PubliciteRepository publiciteRepository, SocieteRepository societeRepository) {
+    public PubliciteService(PubliciteRepository publiciteRepository,
+                            SocieteRepository societeRepository,
+                            PaiementPubliciteRepository paiementPubliciteRepository) {
         this.publiciteRepository = publiciteRepository;
         this.societeRepository = societeRepository;
+        this.paiementPubliciteRepository = paiementPubliciteRepository;
     }
 
     public Publicite create(Publicite publicite) {
@@ -49,9 +55,9 @@ public class PubliciteService {
                 .orElseThrow(() -> new RuntimeException("Publicité non trouvée avec id: " + id));
 
         p.setDateDiffusion(details.getDateDiffusion());
-        p.setCout(details.getCout());
         p.setVehicule(details.getVehicule());
         p.setSociete(details.getSociete());
+        p.setEstPaye(details.getEstPaye());
 
         return publiciteRepository.save(p);
     }
@@ -64,33 +70,57 @@ public class PubliciteService {
         return publiciteRepository.findAll().stream()
                 .filter(p -> p.getDateDiffusion().getYear() == year && p.getDateDiffusion().getMonthValue() == month)
                 .toList();
-       
     }
 
-
-    public BigDecimal totalCout(List<Publicite> publicites) {
-        float total = 0;
+    /**
+     * Calcule le montant total payé pour une liste de publicités
+     */
+    public BigDecimal totalPaye(List<Publicite> publicites) {
+        BigDecimal total = BigDecimal.ZERO;
         for (Publicite p : publicites) {
-            total += p.getCout().floatValue();
+            BigDecimal montantPaye = paiementPubliciteRepository.sumMontantByPubliciteId(p.getId());
+            total = total.add(montantPaye != null ? montantPaye : BigDecimal.ZERO);
         }
-        return BigDecimal.valueOf(total);
+        return total;
     }
 
-    public BigDecimal totalCoutBySocieteAndAnneeMois(Integer societeId, Integer annee, Integer mois) {
-        List<Publicite> publicites = publiciteRepository.findBySociete_Id(societeId);
-        publicites = publicites.stream()
-                .filter(p -> p.getDateDiffusion().getYear() == annee && p.getDateDiffusion().getMonthValue() == mois)
-                .toList();
-        return totalCout(publicites);
+    /**
+     * Calcule le montant total payé pour une société donnée
+     */
+    public BigDecimal totalPayeBySociete(Integer societeId) {
+        BigDecimal result = paiementPubliciteRepository.sumMontantBySocieteId(societeId);
+        return result != null ? result : BigDecimal.ZERO;
     }
 
-    public Map<Integer, BigDecimal> totalCoutSociete(Integer annee, Integer mois) {
+    /**
+     * Calcule le montant total payé pour une société par année et mois
+     */
+    public BigDecimal totalPayeBySocieteAndAnneeMois(Integer societeId, Integer annee, Integer mois) {
+        BigDecimal result = paiementPubliciteRepository.sumMontantBySocieteIdAndAnneeMois(societeId, annee, mois);
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    /**
+     * Retourne une map avec le total payé par société pour une année/mois donnés
+     */
+    public Map<Integer, BigDecimal> totalPayeParSociete(Integer annee, Integer mois) {
         Map<Integer, BigDecimal> result = new HashMap<>();
         List<Societe> societes = societeRepository.findAll();
         for (Societe s : societes) {
-            result.put(s.getId(), totalCoutBySocieteAndAnneeMois(s.getId(), annee, mois));
+            if (annee != null && mois != null) {
+                result.put(s.getId(), totalPayeBySocieteAndAnneeMois(s.getId(), annee, mois));
+            } else {
+                result.put(s.getId(), totalPayeBySociete(s.getId()));
+            }
         }
         return result;
+    }
+
+    /**
+     * Retourne une map avec le total payé par société (sans filtre)
+     */
+    public Map<Integer, BigDecimal> totalPayeParSociete() {
+        return totalPayeParSociete(null, null);
     }
 
 }

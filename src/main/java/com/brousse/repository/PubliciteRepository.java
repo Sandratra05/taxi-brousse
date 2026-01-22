@@ -15,4 +15,6 @@ public interface PubliciteRepository extends JpaRepository<Publicite, Integer>, 
 
     List<Publicite> findByVehicule_Id(Integer idVehicule);
 
+    List<Publicite> findBySociete_IdAndEstPayeFalse(Integer idSociete);
+
 }

@@ -1,8 +1,43 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
-    <title>Chiffre d' Affaires</title>
+    <title>Chiffre d'Affaires Publicités</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <style>
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px 25px;
+            border-radius: 5px;
+            min-width: 200px;
+        }
+        .stat-box h4 {
+            margin: 0 0 5px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .stat-box .value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .stat-box.ca .value { color: #2196F3; }
+        .stat-box.paye .value { color: #4CAF50; }
+        .stat-box.apayer .value { color: #FF9800; }
+        .stat-box.reste .value { color: #f44336; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f5f5f5; }
+        .text-right { text-align: right; }
+        .text-success { color: #4CAF50; }
+        .text-warning { color: #FF9800; }
+        .text-danger { color: #f44336; }
+    </style>
 </head>
 <body>
 
@@ -10,69 +45,73 @@
 
 <div class="content">
 
-    <h1>Chiffre d' Affaires</h1>
+    <h1>Chiffre d'Affaires Publicités</h1>
 
     <form action="/publicites" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
-        <h3>Filtrer les publicites</h3>
-    
-        <!-- <label>Véhicule:
-            <select name="vehiculeId">
-                <option value="">-- Tous --</option>
-                <option th:each="v : ${vehicules}" 
-                        th:value="${v.id}" 
-                        th:text="${v.immatriculation}"
-                        th:selected="${vehiculeId != null && vehiculeId == v.id}"></option>
-            </select>
-        </label> -->
-        
-        <!-- <br/> -->
+        <h3>Filtrer les publicités</h3>
 
-        <!-- <label>Societe :
-            <select name="societeId">
-                <option value="">-- Tous --</option>
-                <option th:each="s : ${societes}" 
-                        th:value="${s.id}" 
-                        th:text="${s.nom}"
-                        th:selected="${societeId != null && societeId == s.id}"></option>
+        <label>Année :
+            <select name="anneeDiffusion">
+                <option value="">-- Toutes --</option>
+                <option th:each="annee : ${annees}" th:value="${annee}" th:text="${annee}" th:selected="${anneeDiffusion != null && anneeDiffusion == annee}"></option>
             </select>
-        </label> -->
-
-        <!-- <br> -->
-        
-        <label>Annee : 
-            <input type="number" name="anneeDiffusion" th:value="${anneeDiffusion}"/>
         </label>
         
         <label> Mois : 
-            <input type="number" name="moisDiffusion" th:value="${moisDiffusion}"/>
+            <select name="moisDiffusion">
+                <option value="">-- Tous --</option>
+                <option value="1" th:selected="${moisDiffusion != null && moisDiffusion == 1}">Janvier</option>
+                <option value="2" th:selected="${moisDiffusion != null && moisDiffusion == 2}">Février</option>
+                <option value="3" th:selected="${moisDiffusion != null && moisDiffusion == 3}">Mars</option>
+                <option value="4" th:selected="${moisDiffusion != null && moisDiffusion == 4}">Avril</option>
+                <option value="5" th:selected="${moisDiffusion != null && moisDiffusion == 5}">Mai</option>
+                <option value="6" th:selected="${moisDiffusion != null && moisDiffusion == 6}">Juin</option>
+                <option value="7" th:selected="${moisDiffusion != null && moisDiffusion == 7}">Juillet</option>
+                <option value="8" th:selected="${moisDiffusion != null && moisDiffusion == 8}">Août</option>
+                <option value="9" th:selected="${moisDiffusion != null && moisDiffusion == 9}">Septembre</option>
+                <option value="10" th:selected="${moisDiffusion != null && moisDiffusion == 10}">Octobre</option>
+                <option value="11" th:selected="${moisDiffusion != null && moisDiffusion == 11}">Novembre</option>
+                <option value="12" th:selected="${moisDiffusion != null && moisDiffusion == 12}">Décembre</option>
+            </select>
         </label>
         
-        <br/>
-        
+        <br/><br/>
+
         <button type="submit">Filtrer</button>
         <a href="/publicites">Réinitialiser</a>
     </form>
 
-    <h2>Total Chiffres: <span th:text="${#numbers.formatDecimal(totalCout, 0, 'COMMA', 2, 'POINT')} + ' AR'"></span></h2>
+    <p><strong>Tarif actuel par diffusion :</strong> <span th:text="${#numbers.formatDecimal(tarifActuel, 0, 'COMMA', 2, 'POINT')} + ' AR'"></span></p>
+
+    <div class="stats-container">
+        <div class="stat-box ca">
+            <h4>Chiffre d'Affaires (CA)</h4>
+            <span class="value" th:text="${#numbers.formatDecimal(chiffreAffaires, 0, 'COMMA', 2, 'POINT')} + ' AR'"></span>
+        </div>
+    </div>
 
     <table>
         <thead>
         <tr>
             <th>Société</th>
-            <th>Montant Publicité</th>
-            <th>Payé</th>
-            <th>Reste à payer</th>
+            <th class="text-right">Nb Publicités</th>
+            <th class="text-right">Nb Publicités Payées</th>
+            <th class="text-right">Total à Payer</th>
+            <th class="text-right">Total Payé</th>
+            <th class="text-right">Reste à Payer</th>
         </tr>
         </thead>
         <tbody>
             <tr th:each="s : ${societes}">
                 <td><strong th:text="${s.nom}"></strong></td>
-                <td th:text="${#numbers.formatDecimal((totalCoutSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
-                <td th:text="${#numbers.formatDecimal((totalCoutSocietePaye[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
-                <td th:text="${#numbers.formatDecimal((totalCoutSocieteReste[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
+                <td class="text-right" th:text="${nombrePublicitesSociete[s.id] ?: 0}"></td>
+                <td class="text-right" th:text="${nombrePublicitesPayeesSociete[s.id] ?: 0}"></td>
+                <td class="text-right text-warning" th:text="${#numbers.formatDecimal((totalAPayerSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
+                <td class="text-right text-success" th:text="${#numbers.formatDecimal((totalPayeSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
+                <td class="text-right text-danger" th:text="${#numbers.formatDecimal((resteAPayerSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
             </tr>
             <tr th:if="${#lists.isEmpty(societes)}">
-                <td colspan="4" class="text-center"><i class="fas fa-info-circle"></i> Aucune société trouvée.</td>
+                <td colspan="6" class="text-center"><i class="fas fa-info-circle"></i> Aucune société trouvée.</td>
             </tr>
         </tbody>
     </table>

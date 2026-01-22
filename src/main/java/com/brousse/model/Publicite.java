@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,9 +21,6 @@ public class Publicite {
     @Column(name = "date_diffusion", nullable = false)
     private LocalDateTime dateDiffusion;
 
-    @Column(name = "cout", nullable = false, precision = 15, scale = 2)
-    private BigDecimal cout;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_vehicule", nullable = false)
     private Vehicule vehicule;
@@ -32,6 +30,9 @@ public class Publicite {
     private Societe societe;
 
     @Column(name = "est_paye", nullable = false)
-    private Boolean estPaye;
+    private Boolean estPaye = false;
+
+    @OneToMany(mappedBy = "publicite", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PaiementPublicite> paiements = new ArrayList<>();
 
 }
