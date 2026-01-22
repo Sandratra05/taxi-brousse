@@ -353,10 +353,27 @@ CREATE TABLE societe (
 CREATE TABLE publicite (
    id_publicite SERIAL PRIMARY KEY,
    date_diffusion TIMESTAMP NOT NULL,
-   cout DECIMAL(15,2) NOT NULL,
    id_vehicule INT NOT NULL,
    id_societe INT NOT NULL,
+   est_paye BOOLEAN NOT NULL,
    FOREIGN KEY (id_societe) REFERENCES societe(id_societe),
    FOREIGN KEY (id_vehicule) REFERENCES vehicule(id_vehicule)
 );
 
+CREATE TABLE tarif_publicite (
+    id_tarif_publicite SERIAL PRIMARY KEY,
+    montant DECIMAL(15,2) NOT NULL,
+    date_tarif TIMESTAMP NOT NULL
+);
+
+
+CREATE TABLE paiement_publicite (
+    id_paiement_publicite SERIAL,
+    montant NUMERIC(15,2) NOT NULL,
+    date_paiement TIMESTAMP NOT NULL,
+    id_publicite INTEGER NOT NULL,
+    id_methode_paiement INTEGER NOT NULL,
+    PRIMARY KEY(id_paiement_publicite),
+    FOREIGN KEY(id_publicite) REFERENCES publicite(id_publicite),
+    FOREIGN KEY(id_methode_paiement) REFERENCES methode_paiement(id_methode_paiement)
+);

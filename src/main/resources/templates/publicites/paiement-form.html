@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <title>Paiement Publicités</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group select,
+        .form-group input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        .form-group select {
+            min-width: 300px;
+        }
+        .publicites-list {
+            margin-top: 20px;
+            display: none;
+        }
+        .publicites-list.visible {
+            display: block;
+        }
+        .publicites-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .publicites-table th,
+        .publicites-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .publicites-table th {
+            background: #f5f5f5;
+        }
+        .publicites-table tr:hover {
+            background: #f9f9f9;
+        }
+        .publicites-table input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .total-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            display: none;
+        }
+        .total-section.visible {
+            display: block;
+        }
+        .total-section .total-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .btn-submit {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background: #45a049;
+        }
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .no-publicites {
+            padding: 20px;
+            background: #fff3e0;
+            border-radius: 5px;
+            color: #e65100;
+        }
+        .select-all-container {
+            margin: 10px 0;
+        }
+        .select-all-container label {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<div class="content">
+
+    <h1>Paiement des Publicités</h1>
+
+    <!-- Messages de succès/erreur -->
+    <div th:if="${success}" style="padding: 15px; background: #e8f5e9; color: #2e7d32; border-radius: 5px; margin-bottom: 20px;">
+        <strong>Succès !</strong> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" style="padding: 15px; background: #ffebee; color: #c62828; border-radius: 5px; margin-bottom: 20px;">
+        <strong>Erreur !</strong> <span th:text="${error}"></span>
+    </div>
+
+    <form id="paiementForm" th:action="@{/publicites/paiement}" method="post">
+
+        <div class="form-group">
+            <label for="societeSelect">Sélectionner une société :</label>
+            <select id="societeSelect" name="societeId" required>
+                <option value="">-- Choisir une société --</option>
+                <option th:each="s : ${societes}" th:value="${s.id}" th:text="${s.nom}"></option>
+            </select>
+        </div>
+
+        <div id="publicitesContainer" class="publicites-list">
+            <h3>Publicités non payées</h3>
+
+            <div id="loadingMessage" style="display: none;">Chargement...</div>
+            <div id="noPublicitesMessage" class="no-publicites" style="display: none;">
+                Aucune publicité non payée pour cette société.
+            </div>
+
+            <div id="publicitesTableContainer" style="display: none;">
+                <div class="select-all-container">
+                    <label>
+                        <input type="checkbox" id="selectAll"> Tout sélectionner
+                    </label>
+                </div>
+
+                <table class="publicites-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Sélection</th>
+                            <th>Date Diffusion</th>
+                            <th>Véhicule</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody id="publicitesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="totalSection" class="total-section">
+            <p>Nombre de publicités sélectionnées : <strong id="nbSelected">0</strong></p>
+            <p>Total à payer : <span class="total-value" id="totalAPayer">0 AR</span></p>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="datePaiement">Date de paiement :</label>
+                <input type="datetime-local" id="datePaiement" name="datePaiement" required>
+            </div>
+
+            <div class="form-group">
+                <label for="methodePaiement">Méthode de paiement :</label>
+                <select id="methodePaiement" name="methodePaiementId" required>
+                    <option value="">-- Choisir --</option>
+                    <option th:each="m : ${methodesPaiement}" th:value="${m.id}" th:text="${m.libelle}"></option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btnSubmit" disabled>
+                Valider le paiement
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<script th:inline="javascript">
+    const tarifPublicite = /*[[${tarifActuel}]]*/ 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const societeSelect = document.getElementById('societeSelect');
+        const publicitesContainer = document.getElementById('publicitesContainer');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const noPublicitesMessage = document.getElementById('noPublicitesMessage');
+        const publicitesTableContainer = document.getElementById('publicitesTableContainer');
+        const publicitesTableBody = document.getElementById('publicitesTableBody');
+        const totalSection = document.getElementById('totalSection');
+        const nbSelected = document.getElementById('nbSelected');
+        const totalAPayer = document.getElementById('totalAPayer');
+        const selectAll = document.getElementById('selectAll');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const datePaiement = document.getElementById('datePaiement');
+
+        // Initialiser la date par défaut à maintenant
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        datePaiement.value = now.toISOString().slice(0, 16);
+
+        // Changement de société
+        societeSelect.addEventListener('change', function() {
+            const societeId = this.value;
+
+            if (!societeId) {
+                publicitesContainer.classList.remove('visible');
+                totalSection.classList.remove('visible');
+                return;
+            }
+
+            loadPublicitesNonPayees(societeId);
+        });
+
+        // Charger les publicités non payées
+        function loadPublicitesNonPayees(societeId) {
+            publicitesContainer.classList.add('visible');
+            loadingMessage.style.display = 'block';
+            noPublicitesMessage.style.display = 'none';
+            publicitesTableContainer.style.display = 'none';
+            totalSection.classList.remove('visible');
+
+            fetch('/publicites/api/non-payees/' + societeId)
+                .then(response => response.json())
+                .then(data => {
+                    loadingMessage.style.display = 'none';
+
+                    if (data.length === 0) {
+                        noPublicitesMessage.style.display = 'block';
+                        return;
+                    }
+
+                    renderPublicites(data);
+                    publicitesTableContainer.style.display = 'block';
+                    totalSection.classList.add('visible');
+                })
+                .catch(error => {
+                    loadingMessage.style.display = 'none';
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du chargement des publicités');
+                });
+        }
+
+        // Afficher les publicités dans le tableau
+        function renderPublicites(publicites) {
+            publicitesTableBody.innerHTML = '';
+            selectAll.checked = false;
+
+            publicites.forEach(pub => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <input type="checkbox" name="publiciteIds" value="${pub.id}" class="pub-checkbox">
+                    </td>
+                    <td>${formatDate(pub.dateDiffusion)}</td>
+                    <td>${pub.vehiculeImmatriculation}</td>
+                    <td>${formatMontant(tarifPublicite)} AR</td>
+                `;
+                publicitesTableBody.appendChild(tr);
+            });
+
+            // Ajouter les listeners aux checkboxes
+            document.querySelectorAll('.pub-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateTotal);
+            });
+
+            updateTotal();
+        }
+
+        // Formater la date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Formater le montant
+        function formatMontant(montant) {
+            return new Intl.NumberFormat('fr-FR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(montant);
+        }
+
+        // Mettre à jour le total
+        function updateTotal() {
+            const checkedBoxes = document.querySelectorAll('.pub-checkbox:checked');
+            const count = checkedBoxes.length;
+            const total = count * tarifPublicite;
+
+            nbSelected.textContent = count;
+            totalAPayer.textContent = formatMontant(total) + ' AR';
+
+            btnSubmit.disabled = count === 0;
+        }
+
+        // Tout sélectionner / désélectionner
+        selectAll.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.pub-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateTotal();
+        });
+
+        // Validation du formulaire
+        document.getElementById('paiementForm').addEventListener('submit', function(e) {
+            const checkedBoxes = document.querySelectorAll('.pub-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                e.preventDefault();
+                alert('Veuillez sélectionner au moins une publicité');
+                return;
+            }
+
+            const methodePaiement = document.getElementById('methodePaiement').value;
+            if (!methodePaiement) {
+                e.preventDefault();
+                alert('Veuillez sélectionner une méthode de paiement');
+                return;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
