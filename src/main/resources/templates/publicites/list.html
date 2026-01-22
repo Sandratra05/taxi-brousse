@@ -60,15 +60,19 @@
         <tr>
             <th>Société</th>
             <th>Montant Publicité</th>
+            <th>Payé</th>
+            <th>Reste à payer</th>
         </tr>
         </thead>
         <tbody>
             <tr th:each="s : ${societes}">
                 <td><strong th:text="${s.nom}"></strong></td>
                 <td th:text="${#numbers.formatDecimal((totalCoutSociete[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
+                <td th:text="${#numbers.formatDecimal((totalCoutSocietePaye[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
+                <td th:text="${#numbers.formatDecimal((totalCoutSocieteReste[s.id] ?: 0), 0, 'COMMA', 2, 'POINT')} + ' AR'"></td>
             </tr>
             <tr th:if="${#lists.isEmpty(societes)}">
-                <td colspan="2" class="text-center"><i class="fas fa-info-circle"></i> Aucune société trouvée.</td>
+                <td colspan="4" class="text-center"><i class="fas fa-info-circle"></i> Aucune société trouvée.</td>
             </tr>
         </tbody>
     </table>
