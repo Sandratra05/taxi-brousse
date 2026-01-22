@@ -341,3 +341,22 @@ CREATE TABLE reduction (
    FOREIGN KEY (id_type_client) REFERENCES type_client(id_type_client)
    
 );
+
+CREATE TABLE societe (
+   id_societe SERIAL PRIMARY KEY,
+   nom VARCHAR(100) NOT NULL,
+   adresse VARCHAR(200),
+   telephone VARCHAR(50),
+   email VARCHAR(100)
+);
+
+CREATE TABLE publicite (
+   id_publicite SERIAL PRIMARY KEY,
+   date_diffusion TIMESTAMP NOT NULL,
+   cout DECIMAL(15,2) NOT NULL,
+   id_vehicule INT NOT NULL,
+   id_societe INT NOT NULL,
+   FOREIGN KEY (id_societe) REFERENCES societe(id_societe),
+   FOREIGN KEY (id_vehicule) REFERENCES vehicule(id_vehicule)
+);
+
