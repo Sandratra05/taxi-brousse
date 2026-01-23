@@ -37,7 +37,7 @@ INSERT INTO categorie (code, nom, ordre, active) VALUES
 INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
 ('Mercedes Benz', 'Sprinter', 12.5, 32),
 ('Iveco', 'Daily', 10.0, 16),
-('Scania', 'Scania', 15.0, 50),
+('Scania', 'Scania', 15.0, 70),
 ('Volvo', 'Volvo', 14.0, 45);
 
 INSERT INTO vehicule_modele (marque, modele, consommation_l_100km, place) VALUES
@@ -62,7 +62,7 @@ INSERT INTO vehicule (immatriculation, consommation_l_100km, id_vehicule_modele)
 ('1234-TAB', 12.5, 1),
 ('5678-TAM', 10.0, 2),
 ('9012-FIA', 15.0, 3),
-('3456-MAH', 14.0, 4);
+('1244-TBK', 14.0, 3);
 
 -- Insertion des places pour les véhicules (exemple pour le premier véhicule, 32 places)
 -- ALTER TABLE place ADD COLUMN IF NOT EXISTS id_categorie INTEGER;
@@ -213,18 +213,18 @@ INSERT INTO trajet (distance_km, duree_estimee_minutes, id_gare_arrivee, id_gare
 (600.00, 720, 3, 2); -- Toamasina -> Fianarantsoa
 
 -- Insertion des voyages
-INSERT INTO voyage (date_depart, id_chauffeur, id_vehicule, id_trajet) VALUES
-('2026-07-01 08:00:00', 1, 1, 1),
-('2026-07-02 09:00:00', 2, 2, 2),
-('2026-07-03 10:00:00', 3, 4, 3),
-('2026-07-04 11:00:00', 4, 1, 4);
+-- INSERT INTO voyage (date_depart, id_chauffeur, id_vehicule, id_trajet) VALUES
+-- ('2026-01-20 10:00:00', 1, 4, 1),
+-- ('2026-01-21 10:00:00', 2, 4, 2),
+-- ('2026-01-21 15:00:00', 3, 4, 3);
+-- -- ('2026-07-04 11:00:00', 4, 1, 4);
 
--- Insertion des statuts de voyage
-INSERT INTO statut_voyage (date_statut, id_voyage_statut, id_voyage) VALUES
-('2026-06-30 00:00:00', 1, 1),
-('2026-07-02 00:00:00', 2, 2),
-('2026-07-03 00:00:00', 3, 3),
-('2026-07-04 00:00:00', 4, 4);
+-- -- Insertion des statuts de voyage
+-- INSERT INTO statut_voyage (date_statut, id_voyage_statut, id_voyage) VALUES
+-- ('2026-01-20 00:00:00', 1, 1),
+-- ('2026-01-20 00:00:00', 2, 2),
+-- ('2026-07-03 00:00:00', 3, 3),
+-- ('2026-07-04 00:00:00', 4, 4);
 
 -- Insertion des clients
 INSERT INTO client (nom, prenom, telephone, email) VALUES
@@ -334,48 +334,14 @@ INSERT INTO reduction (id_type_client, reduction) VALUES
 (3, 20.0); -- Senior : 20% de réduction
 
 
+-- Insertion des sociétés (4 sociétés : Vaniala, Lewis, Socobis, Jejoo)
 INSERT INTO societe (nom, adresse, telephone, email) VALUES
 ('Vaniala', 'Lot II A 123, Antananarivo', '+261341234567', 'contact@vaniala.mg'),
-('Lewis', 'Av. de la Publicité, Toamasina', '+261342345678', 'info@lewis.mg');
--- ('Sponsor Malagasy', 'Rue du Sponsor, Fianarantsoa', '+261343456789', 'hello@sponsor.mg');
+('Lewis', 'Av. de la Publicité, Toamasina', '+261342345678', 'info@lewis.mg'),
+('Socobis', 'Zone Industrielle, Antsirabe', '+261343456789', 'pub@socobis.mg'),
+('Jejoo', 'Rue du Commerce, Mahajanga', '+261344567890', 'marketing@jejoo.mg');
 
-
--- INSERT INTO publicite (date_diffusion, id_vehicule, id_societe, est_paye) VALUES
--- ('2025-12-01 08:00:00', 1, 1, FALSE),
--- ('2025-12-02 08:00:00', 2, 1, FALSE),
--- ('2025-12-03 08:00:00', 3, 1, FALSE),
--- ('2025-12-04 08:00:00', 4, 1, FALSE),
--- ('2025-12-05 08:00:00', 1, 1, FALSE),
--- ('2025-12-06 08:00:00', 2, 1, FALSE),
--- ('2025-12-07 08:00:00', 3, 1, FALSE),
--- ('2025-12-08 08:00:00', 4, 1, FALSE),
--- ('2025-12-09 08:00:00', 1, 1, FALSE),
--- ('2025-12-10 08:00:00', 2, 1, FALSE),
--- -- Vaniala (10 diffusions)
--- ('2025-12-11 08:00:00', 3, 1, FALSE),
--- ('2025-12-12 08:00:00', 4, 1, FALSE),
--- ('2025-12-13 08:00:00', 1, 1, FALSE),
---
--- ('2025-12-14 08:00:00', 2, 1, FALSE),
--- ('2025-12-15 08:00:00', 3, 1, FALSE),
--- ('2025-12-16 08:00:00', 4, 1, FALSE),
--- ('2025-12-17 08:00:00', 1, 1, FALSE),
--- ('2025-12-18 08:00:00', 2, 1, FALSE),
--- ('2025-12-19 08:00:00', 3, 1, FALSE),
--- ('2025-12-20 08:00:00', 4, 1, FALSE),
---
--- -- Lewis (10 diffusions)
--- ('2025-12-21 08:00:00', 1, 2, FALSE),
--- ('2025-12-22 08:00:00', 2, 2, FALSE),
--- ('2025-12-23 08:00:00', 3, 2, FALSE),
--- ('2025-12-24 08:00:00', 4, 2, FALSE),
--- ('2025-12-25 08:00:00', 1, 2, FALSE),
--- ('2025-12-26 08:00:00', 2, 2, FALSE),
--- ('2025-12-27 08:00:00', 3, 2, FALSE),
--- ('2025-12-28 08:00:00', 4, 2, FALSE),
--- ('2025-12-29 08:00:00', 1, 2, FALSE),
--- ('2025-12-30 08:00:00', 2, 2, FALSE);
-
+-- Tarif publicité : 100 000 AR par diffusion
 INSERT INTO tarif_publicite (montant, date_tarif) VALUES (100000, NOW());
 
 -- Insertion des publicités (table publicite : id, nom, id_societe)
@@ -390,44 +356,45 @@ INSERT INTO publicite (nom, id_societe) VALUES
 ('Pub Lewis - Mode', 2),
 ('Pub Lewis - Accessoires', 2);
 
+-- Socobis (id_societe = 3)
+INSERT INTO publicite (nom, id_societe) VALUES
+('Pub Socobis - Biscuits', 3),
+('Pub Socobis - Chocolat', 3);
+
+-- Jejoo (id_societe = 4)
+INSERT INTO publicite (nom, id_societe) VALUES
+('Pub Jejoo - Télécom', 4),
+('Pub Jejoo - Internet', 4);
+
 -- Insertion des diffusions de publicités (table publicite_diffusion)
--- 20 diffusions pour Vaniala (id_societe = 1, publicites id 1, 2, 3)
--- 10 diffusions pour Lewis (id_societe = 2, publicites id 4, 5)
--- Toutes les diffusions sont non payées (est_paye = FALSE)
+-- Avec nb_diffusion pour chaque enregistrement
 -- Voyages disponibles : 1, 2, 3, 4
 
-INSERT INTO publicite_diffusion (date_diffusion, id_publicite, est_paye, id_voyage) VALUES
--- Vaniala - 20 diffusions
-('2026-01-05 08:00:00', 1, FALSE, 1),
-('2026-01-06 09:00:00', 1, FALSE, 2),
-('2026-01-07 10:00:00', 2, FALSE, 3),
-('2026-01-08 11:00:00', 2, FALSE, 4),
-('2026-01-09 08:00:00', 3, FALSE, 1),
-('2026-01-10 09:00:00', 1, FALSE, 2),
-('2026-01-11 10:00:00', 1, FALSE, 3),
-('2026-01-12 11:00:00', 2, FALSE, 4),
-('2026-01-13 08:00:00', 2, FALSE, 1),
-('2026-01-14 09:00:00', 3, FALSE, 2),
-('2026-01-15 10:00:00', 3, FALSE, 3),
-('2026-01-16 11:00:00', 1, FALSE, 4),
-('2026-01-17 08:00:00', 1, FALSE, 1),
-('2026-01-18 09:00:00', 2, FALSE, 2),
-('2026-01-19 10:00:00', 2, FALSE, 3),
-('2026-01-20 11:00:00', 3, FALSE, 4),
-('2026-01-21 08:00:00', 3, FALSE, 1),
-('2026-01-22 09:00:00', 1, FALSE, 2),
-('2026-01-23 10:00:00', 2, FALSE, 3),
-('2026-01-24 11:00:00', 3, FALSE, 4),
+INSERT INTO publicite_diffusion (date_diffusion, id_publicite, nb_diffusion, est_paye, id_voyage) VALUES
+-- Vaniala - 20 diffusions au total (réparties sur plusieurs entrées)
+('2026-01-20 10:00:00', 1, 1, FALSE, 1),
+-- -- ('2026-01-06 09:00:00', 1, 2, FALSE, 2),
+-- -- ('2026-01-07 10:00:00', 2, 4, FALSE, 3),
+-- -- ('2026-01-08 11:00:00', 2, 3, FALSE, 4),
+-- -- ('2026-01-09 08:00:00', 3, 2, FALSE, 1),
+-- -- ('2026-01-10 09:00:00', 1, 3, FALSE, 2),
+-- -- ('2026-01-11 10:00:00', 3, 3, FALSE, 3),
 
--- Lewis - 10 diffusions
-('2026-01-05 08:30:00', 4, FALSE, 1),
-('2026-01-06 09:30:00', 4, FALSE, 2),
-('2026-01-07 10:30:00', 5, FALSE, 3),
-('2026-01-08 11:30:00', 5, FALSE, 4),
-('2026-01-09 08:30:00', 4, FALSE, 1),
-('2026-01-10 09:30:00', 4, FALSE, 2),
-('2026-01-11 10:30:00', 5, FALSE, 3),
-('2026-01-12 11:30:00', 5, FALSE, 4),
-('2026-01-13 08:30:00', 4, FALSE, 1),
-('2026-01-14 09:30:00', 5, FALSE, 2);
+-- -- Lewis - 10 diffusions au total
+('2026-01-20 10:00:00', 4, 1, FALSE, 1),
+-- -- ('2026-01-06 09:30:00', 4, 3, FALSE, 2),
+-- -- ('2026-01-07 10:30:00', 5, 2, FALSE, 3),
+-- -- ('2026-01-08 11:30:00', 5, 3, FALSE, 4),
+
+-- -- Socobis - 15 diffusions au total
+('2026-01-21 10:00:00', 6, 2, FALSE, 2),
+-- -- ('2026-01-13 09:00:00', 6, 4, FALSE, 2),
+-- -- ('2026-01-14 10:00:00', 7, 3, FALSE, 3),
+-- -- ('2026-01-15 11:00:00', 7, 3, FALSE, 4),
+
+-- -- Jejoo - 12 diffusions au total
+('2026-01-21 10:00:00', 8, 1, FALSE, 2);
+-- -- ('2026-01-17 09:00:00', 8, 3, FALSE, 2),
+-- -- ('2026-01-18 10:00:00', 9, 3, FALSE, 3),
+-- -- ('2026-01-19 11:00:00', 9, 2, FALSE, 4);
 
