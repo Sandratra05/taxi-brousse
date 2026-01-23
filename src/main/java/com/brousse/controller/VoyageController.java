@@ -4,15 +4,19 @@ import com.brousse.dto.VoyageFilterDTO;
 import com.brousse.dto.VoyageDTO;
 import com.brousse.model.Voyage;
 import com.brousse.model.PlaceTarif;
+import com.brousse.model.PubliciteDiffusion;
 import com.brousse.model.Vehicule;
 import com.brousse.model.VehiculeStatut;
 import com.brousse.repository.ChauffeurRepository;
+import com.brousse.repository.PaiementDiffusionRepository;
 import com.brousse.repository.PlaceTarifRepository;
+import com.brousse.repository.PubliciteDiffusionRepository;
 import com.brousse.repository.VoyageStatutRepository;
 import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.VehiculeRepository;
 import com.brousse.repository.VehiculeStatutRepository;
 import com.brousse.service.BilletService;
+import com.brousse.service.TarifPubliciteService;
 import com.brousse.service.VehiculeService;
 import com.brousse.service.PlaceTarifService;
 import com.brousse.service.VoyageService;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -42,8 +47,23 @@ public class VoyageController {
     private final BilletService billetService;
     private final VehiculeService vehiculeService;
     private final PlaceTarifService placeTarifService;
+    private final PubliciteDiffusionRepository publiciteDiffusionRepository;
+    private final PaiementDiffusionRepository paiementDiffusionRepository;
+    private final TarifPubliciteService tarifPubliciteService;
 
-    public VoyageController(VoyageService voyageService, ChauffeurRepository chauffeurRepository, VehiculeRepository vehiculeRepository, TrajetRepository trajetRepository, VoyageStatutRepository voyageStatutRepository, VehiculeStatutRepository vehiculeStatutRepository, BilletService billetService, VehiculeService vehiculeService, PlaceTarifService placeTarifService, PlaceTarifRepository placeTarifRepository) {
+    public VoyageController(VoyageService voyageService, 
+                            ChauffeurRepository chauffeurRepository, 
+                            VehiculeRepository vehiculeRepository, 
+                            TrajetRepository trajetRepository, 
+                            VoyageStatutRepository voyageStatutRepository, 
+                            VehiculeStatutRepository vehiculeStatutRepository, 
+                            BilletService billetService, 
+                            VehiculeService vehiculeService, 
+                            PlaceTarifService placeTarifService, 
+                            PlaceTarifRepository placeTarifRepository,
+                            PubliciteDiffusionRepository publiciteDiffusionRepository,
+                            PaiementDiffusionRepository paiementDiffusionRepository,
+                            TarifPubliciteService tarifPubliciteService) {
         this.voyageService = voyageService;
         this.chauffeurRepository = chauffeurRepository;
         this.vehiculeRepository = vehiculeRepository;
@@ -54,6 +74,9 @@ public class VoyageController {
         this.vehiculeService = vehiculeService;
         this.placeTarifService = placeTarifService;
         this.placeTarifRepository = placeTarifRepository;
+        this.publiciteDiffusionRepository = publiciteDiffusionRepository;
+        this.paiementDiffusionRepository = paiementDiffusionRepository;
+        this.tarifPubliciteService = tarifPubliciteService;
     }
 
     // ----- Helpers -----
@@ -148,12 +171,34 @@ public class VoyageController {
 
         model.addAttribute("voyages", voyages);
 
-        // Add status to each voyage
+        // Add status to each voyage + séparation date/heure/gares
         List<Map<String, Object>> voyagesWithStatus = new ArrayList<>();
         for (Voyage v : voyages) {
             Map<String, Object> item = new HashMap<>();
             item.put("voyage", v);
             item.put("statut", voyageService.getCurrentStatusLibelle(v));
+            
+            // Séparer date et heure
+            if (v.getDateDepart() != null) {
+                item.put("date", v.getDateDepart().toLocalDate());
+                item.put("heure", v.getDateDepart().toLocalTime());
+            } else {
+                item.put("date", null);
+                item.put("heure", null);
+            }
+            
+            // Séparer gare départ et gare arrivée
+            if (v.getTrajet() != null) {
+                item.put("gareDepart", v.getTrajet().getGareDepart() != null ? v.getTrajet().getGareDepart().getNom() : "-");
+                item.put("gareArrivee", v.getTrajet().getGareArrivee() != null ? v.getTrajet().getGareArrivee().getNom() : "-");
+            } else {
+                item.put("gareDepart", "-");
+                item.put("gareArrivee", "-");
+            }
+            
+            // Véhicule immatriculation
+            item.put("vehicule", v.getVehicule() != null ? v.getVehicule().getImmatriculation() : "-");
+            
             voyagesWithStatus.add(item);
         }
         model.addAttribute("voyagesWithStatus", voyagesWithStatus);
@@ -174,12 +219,45 @@ public class VoyageController {
             Integer tarifVip = tarifs.getOrDefault("VIP", 0);
             Integer tarifPremium = tarifs.getOrDefault("Premium", 0);
 
-            double revenue = billetService.getBilletsByVoyage(v.getId()).stream().mapToDouble(b -> b.getMontantTotal().doubleValue()).sum();
+            // Somme de tous les billets générés (payés ou non)
+            double revenueTickets = billetService.getBilletsByVoyage(v.getId()).stream()
+                    .mapToDouble(b -> b.getMontantTotal() != null ? b.getMontantTotal().doubleValue() : 0.0)
+                    .sum();
+
+            // Calcul du montant généré par les publicités pour ce voyage
+            // = somme des paiements_diffusion pour toutes les publicite_diffusion de ce voyage
+            List<PubliciteDiffusion> diffusionsVoyage = publiciteDiffusionRepository.findByVoyage_Id(v.getId());
+            BigDecimal revenuePublicites = BigDecimal.ZERO;
+            for (PubliciteDiffusion pd : diffusionsVoyage) {
+                BigDecimal sommePaiements = paiementDiffusionRepository.sumMontantByPubliciteDiffusionId(pd.getId());
+                if (sommePaiements != null) {
+                    revenuePublicites = revenuePublicites.add(sommePaiements);
+                }
+            }
+
+            // Calcul du montant total à payer pour les publicités de ce voyage
+            // = somme de (nb_diffusion * tarif) pour chaque diffusion du voyage
+            BigDecimal tarifActuel = tarifPubliciteService.getMontantTarifActuel();
+            BigDecimal montantTotalPublicites = BigDecimal.ZERO;
+            for (PubliciteDiffusion pd : diffusionsVoyage) {
+                int nbDiff = pd.getNbDiffusion() != null ? pd.getNbDiffusion() : 0;
+                montantTotalPublicites = montantTotalPublicites.add(tarifActuel.multiply(BigDecimal.valueOf(nbDiff)));
+            }
+
+            // Reste à payer = montant total - montant payé (revenuePublicites)
+            BigDecimal resteAPayerPublicites = montantTotalPublicites.subtract(revenuePublicites);
+            if (resteAPayerPublicites.compareTo(BigDecimal.ZERO) < 0) {
+                resteAPayerPublicites = BigDecimal.ZERO;
+            }
 
             places.put("standard", nbStandard);
             places.put("vip", nbVip);
             places.put("premium", nbPremium);
-            places.put("revenueMax", revenue);
+            places.put("revenueTickets", revenueTickets);
+            places.put("revenuePublicites", montantTotalPublicites.doubleValue()); // Montant total généré par les publicités
+            places.put("montantPayePublicites", revenuePublicites.doubleValue()); // Montant déjà payé
+            places.put("resteAPayerPublicites", resteAPayerPublicites.doubleValue());
+            places.put("revenueTotal", revenueTickets + montantTotalPublicites.doubleValue());
 
             placesParCategorie.put(v.getId(), places);
         }
@@ -213,6 +291,10 @@ public class VoyageController {
                 trajetStr = dto.getTrajet().getGareDepart().getNom() + " → " + dto.getTrajet().getGareArrivee().getNom();
             }
             item.put("trajet", trajetStr);
+
+            
+            System.out.println("depart = " + dto.getTrajet().getGareDepart().getNom());
+            System.out.println("arrive = " + dto.getTrajet().getGareArrivee().getNom());
 
             // Chauffeur (nom + prénom si disponible)
             String chauffeurStr = "-";

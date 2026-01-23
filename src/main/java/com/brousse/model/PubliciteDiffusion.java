@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -25,15 +23,15 @@ public class PubliciteDiffusion {
     @JoinColumn(name = "id_publicite", nullable = false)
     private Publicite publicite;
 
+    @Column(name = "nb_diffusion", nullable = false)
+    private Integer nbDiffusion;
+
     @Column(name = "est_paye", nullable = false)
     private Boolean estPaye = false;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_voyage", nullable = false)
     private Voyage voyage;
-
-    @OneToMany(mappedBy = "publiciteDiffusion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PaiementPublicite> paiements = new ArrayList<>();
 
 }
 
