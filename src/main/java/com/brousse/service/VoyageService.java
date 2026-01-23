@@ -120,9 +120,9 @@ public class VoyageService {
         if (dateDepart == null) {
             throw new IllegalArgumentException("La date de départ est obligatoire.");
         }
-        if (dateDepart.isBefore(LocalDateTime.now().minusMinutes(2))) {
-            throw new IllegalArgumentException("La date de départ ne peut pas être dans le passé.");
-        }
+        // if (dateDepart.isBefore(LocalDateTime.now().minusMinutes(2))) {
+        //     throw new IllegalArgumentException("La date de départ ne peut pas être dans le passé.");
+        // }
 
         Chauffeur chauffeur = chauffeurRepository.findById(idChauffeur)
                 .orElseThrow(() -> new IllegalArgumentException("Chauffeur introuvable."));
@@ -130,15 +130,15 @@ public class VoyageService {
         Vehicule vehicule = vehiculeRepository.findById(idVehicule)
                 .orElseThrow(() -> new IllegalArgumentException("Véhicule introuvable."));
 
-        String vehiculeStatus = getCurrentVehiculeStatusLibelle(vehicule);
-        if (vehiculeStatus == null || !vehiculeStatus.equalsIgnoreCase("Disponible")) {
-            throw new IllegalArgumentException("Ce véhicule n'est pas disponible.");
-        }
+        // String vehiculeStatus = getCurrentVehiculeStatusLibelle(vehicule);
+        // if (vehiculeStatus == null || !vehiculeStatus.equalsIgnoreCase("Disponible")) {
+        //     throw new IllegalArgumentException("Ce véhicule n'est pas disponible.");
+        // }
 
         Trajet trajet = trajetRepository.findById(idTrajet)
                 .orElseThrow(() -> new IllegalArgumentException("Trajet introuvable."));
 
-        verifierDisponibiliteVehiculeEtChauffeur(chauffeur, vehicule, trajet, dateDepart, null);
+        // verifierDisponibiliteVehiculeEtChauffeur(chauffeur, vehicule, trajet, dateDepart, null);
 
         LocalDateTime from = dateDepart.minusHours(2);
         LocalDateTime to = dateDepart.plusHours(2);
