@@ -3,9 +3,13 @@ package com.brousse.service;
 import com.brousse.model.MethodePaiement;
 import com.brousse.model.PaiementPublicite;
 import com.brousse.model.PubliciteDiffusion;
+import com.brousse.model.Societe;
 import com.brousse.repository.MethodePaiementRepository;
 import com.brousse.repository.PaiementPubliciteRepository;
 import com.brousse.repository.PubliciteDiffusionRepository;
+import com.brousse.repository.SocieteRepository;
+
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +24,16 @@ public class PaiementPubliciteService {
     private final PaiementPubliciteRepository paiementPubliciteRepository;
     private final PubliciteDiffusionRepository publiciteDiffusionRepository;
     private final MethodePaiementRepository methodePaiementRepository;
+    private final SocieteRepository societeRepository;
 
     public PaiementPubliciteService(PaiementPubliciteRepository paiementPubliciteRepository,
                                      PubliciteDiffusionRepository publiciteDiffusionRepository,
-                                     MethodePaiementRepository methodePaiementRepository) {
+                                     MethodePaiementRepository methodePaiementRepository,
+                                     SocieteRepository societeRepository) {
         this.paiementPubliciteRepository = paiementPubliciteRepository;
         this.publiciteDiffusionRepository = publiciteDiffusionRepository;
         this.methodePaiementRepository = methodePaiementRepository;
+        this.societeRepository = societeRepository;
     }
 
     public PaiementPublicite save(PaiementPublicite paiement) {
@@ -34,9 +41,9 @@ public class PaiementPubliciteService {
     }
 
     @Transactional
-    public PaiementPublicite create(Integer diffusionId, BigDecimal montant, Integer methodePaiementId) {
-        PubliciteDiffusion diffusion = publiciteDiffusionRepository.findById(diffusionId)
-                .orElseThrow(() -> new RuntimeException("Diffusion non trouvée avec id: " + diffusionId));
+    public PaiementPublicite create(Integer societeId, BigDecimal montant, Integer methodePaiementId) {
+        Societe societe = societeRepository.findById(societeId)
+                .orElseThrow(() -> new RuntimeException("Société non trouvée avec id: " + societeId));
 
         MethodePaiement methodePaiement = methodePaiementRepository.findById(methodePaiementId)
                 .orElseThrow(() -> new RuntimeException("Méthode de paiement non trouvée avec id: " + methodePaiementId));
@@ -44,14 +51,14 @@ public class PaiementPubliciteService {
         PaiementPublicite paiement = new PaiementPublicite();
         paiement.setMontant(montant);
         paiement.setDatePaiement(LocalDateTime.now());
-        paiement.setPubliciteDiffusion(diffusion);
+        paiement.setSociete(societe);
         paiement.setMethodePaiement(methodePaiement);
 
         PaiementPublicite saved = paiementPubliciteRepository.save(paiement);
 
         // Mettre à jour le statut est_paye de la diffusion
-        diffusion.setEstPaye(true);
-        publiciteDiffusionRepository.save(diffusion);
+        // diffusion.setEstPaye(true);
+        // publiciteDiffusionRepository.save(diffusion);
 
         return saved;
     }
@@ -64,25 +71,25 @@ public class PaiementPubliciteService {
         return paiementPubliciteRepository.findAll();
     }
 
-    public List<PaiementPublicite> findByDiffusionId(Integer diffusionId) {
-        return paiementPubliciteRepository.findByPubliciteDiffusion_Id(diffusionId);
-    }
+    // public List<PaiementPublicite> findByDiffusionId(Integer diffusionId) {
+    //     return paiementPubliciteRepository.findByPubliciteDiffusion_Id(diffusionId);
+    // }
 
-    public List<PaiementPublicite> findBySocieteId(Integer societeId) {
-        return paiementPubliciteRepository.findByPubliciteDiffusion_Publicite_Societe_Id(societeId);
-    }
+    // public List<PaiementPublicite> findBySocieteId(Integer societeId) {
+    //     return paiementPubliciteRepository.findByPubliciteDiffusion_Publicite_Societe_Id(societeId);
+    // }
 
-    public BigDecimal getTotalPayeBySocieteId(Integer societeId) {
-        return paiementPubliciteRepository.sumMontantBySocieteId(societeId);
-    }
+    // public BigDecimal getTotalPayeBySocieteId(Integer societeId) {
+    //     return paiementPubliciteRepository.sumMontantBySocieteId(societeId);
+    // }
 
-    public BigDecimal getTotalPayeByDiffusionId(Integer diffusionId) {
-        return paiementPubliciteRepository.sumMontantByDiffusionId(diffusionId);
-    }
+    // public BigDecimal getTotalPayeByDiffusionId(Integer diffusionId) {
+    //     return paiementPubliciteRepository.sumMontantByDiffusionId(diffusionId);
+    // }
 
-    public BigDecimal getTotalPayeBySocieteIdAndAnneeMois(Integer societeId, Integer annee, Integer mois) {
-        return paiementPubliciteRepository.sumMontantBySocieteIdAndAnneeMois(societeId, annee, mois);
-    }
+    // public BigDecimal getTotalPayeBySocieteIdAndAnneeMois(Integer societeId, Integer annee, Integer mois) {
+    //     return paiementPubliciteRepository.sumMontantBySocieteIdAndAnneeMois(societeId, annee, mois);
+    // }
 
     public void delete(Integer id) {
         paiementPubliciteRepository.deleteById(id);
