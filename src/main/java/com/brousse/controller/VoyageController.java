@@ -16,9 +16,11 @@ import com.brousse.repository.TrajetRepository;
 import com.brousse.repository.VehiculeRepository;
 import com.brousse.repository.VehiculeStatutRepository;
 import com.brousse.service.BilletService;
+import com.brousse.service.ProduitService;
 import com.brousse.service.TarifPubliciteService;
 import com.brousse.service.VehiculeService;
 import com.brousse.service.PlaceTarifService;
+import com.brousse.service.VenteProduitService;
 import com.brousse.service.VoyageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,6 +52,7 @@ public class VoyageController {
     private final PubliciteDiffusionRepository publiciteDiffusionRepository;
     private final PaiementDiffusionRepository paiementDiffusionRepository;
     private final TarifPubliciteService tarifPubliciteService;
+    private final VenteProduitService venteProduitService;
 
     public VoyageController(VoyageService voyageService, 
                             ChauffeurRepository chauffeurRepository, 
@@ -63,7 +66,8 @@ public class VoyageController {
                             PlaceTarifRepository placeTarifRepository,
                             PubliciteDiffusionRepository publiciteDiffusionRepository,
                             PaiementDiffusionRepository paiementDiffusionRepository,
-                            TarifPubliciteService tarifPubliciteService) {
+                            TarifPubliciteService tarifPubliciteService,
+                            VenteProduitService venteProduitService) {
         this.voyageService = voyageService;
         this.chauffeurRepository = chauffeurRepository;
         this.vehiculeRepository = vehiculeRepository;
@@ -77,6 +81,7 @@ public class VoyageController {
         this.publiciteDiffusionRepository = publiciteDiffusionRepository;
         this.paiementDiffusionRepository = paiementDiffusionRepository;
         this.tarifPubliciteService = tarifPubliciteService;
+        this.venteProduitService = venteProduitService;
     }
 
     // ----- Helpers -----
@@ -213,7 +218,7 @@ public class VoyageController {
 
             // Récupérer les tarifs applicables pour le trajet de ce voyage
             List<PlaceTarif> placeTarifs = placeTarifRepository.findAll();
-            java.util.Map<String, Integer> tarifs = voyageService.getTarif(v, placeTarifs);
+            Map<String, Integer> tarifs = voyageService.getTarif(v, placeTarifs);
 
             Integer tarifStandard = tarifs.getOrDefault("Standard", 0);
             Integer tarifVip = tarifs.getOrDefault("VIP", 0);
@@ -250,6 +255,25 @@ public class VoyageController {
                 resteAPayerPublicites = BigDecimal.ZERO;
             }
 
+            // Calcul du montant généré par les ventes de produits pour ce voyage
+            double revenueProduits = venteProduitService.findByVoyageId(v.getId()).stream()
+                    .mapToDouble(vp -> {
+                        if (vp.getProduit() != null && vp.getProduit().getPrixUnitaire() != null && vp.getQuantite() != null  && 
+                    dateDebut != null && !dateDebut.isBlank() && dateFin != null && !dateFin.isBlank()) {
+                            if ( parseDatetimeLocalToLdt(dateDebut).getYear() == vp.getDateVente().getYear() && vp.getDateVente().getMonthValue() == parseDatetimeLocalToLdt(dateFin).getMonthValue()) {
+                                
+                                return vp.getProduit().getPrixUnitaire().doubleValue() * vp.getQuantite();
+                            }
+                            
+                        } else {
+
+                            return vp.getProduit().getPrixUnitaire().doubleValue() * vp.getQuantite();
+                        }
+                        
+                        return 0.0;
+                    })
+                    .sum();
+
             places.put("standard", nbStandard);
             places.put("vip", nbVip);
             places.put("premium", nbPremium);
@@ -257,11 +281,28 @@ public class VoyageController {
             places.put("revenuePublicites", montantTotalPublicites.doubleValue()); // Montant total généré par les publicités
             places.put("montantPayePublicites", revenuePublicites.doubleValue()); // Montant déjà payé
             places.put("resteAPayerPublicites", resteAPayerPublicites.doubleValue());
-            places.put("revenueTotal", revenueTickets + montantTotalPublicites.doubleValue());
+            places.put("revenueProduits", revenueProduits);
+            places.put("revenueTotal", revenueTickets + montantTotalPublicites.doubleValue() + revenueProduits);
 
             placesParCategorie.put(v.getId(), places);
         }
         model.addAttribute("placesParCategorie", placesParCategorie);
+
+        // Calculer les totaux
+        double totalRevenueTickets = 0.0;
+        double totalRevenuePublicites = 0.0;
+        double totalRevenueProduits = 0.0;
+        double totalRevenueGlobal = 0.0;
+        for (Map<String, Object> places : placesParCategorie.values()) {
+            totalRevenueTickets += (Double) places.getOrDefault("revenueTickets", 0.0);
+            totalRevenuePublicites += (Double) places.getOrDefault("revenuePublicites", 0.0);
+            totalRevenueProduits += (Double) places.getOrDefault("revenueProduits", 0.0);
+            totalRevenueGlobal += (Double) places.getOrDefault("revenueTotal", 0.0);
+        }
+        model.addAttribute("totalRevenueTickets", totalRevenueTickets);
+        model.addAttribute("totalRevenuePublicites", totalRevenuePublicites);
+        model.addAttribute("totalRevenueProduits", totalRevenueProduits);
+        model.addAttribute("totalRevenueGlobal", totalRevenueGlobal);
 
         // Charger les données pour les filtres
         model.addAttribute("trajets", trajetRepository.findAll());
