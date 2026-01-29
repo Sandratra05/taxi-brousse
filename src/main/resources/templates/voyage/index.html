@@ -20,6 +20,29 @@
         </a>
     </div>
 
+    <!-- Totaux des chiffres d'affaires -->
+    <div style="border:2px solid #2c3e50; padding:20px; margin-bottom:20px; background:#ecf0f1; border-radius:8px;">
+        <h3 style="margin-top:0; color:#2c3e50;">Résumé des Chiffres d'Affaires</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:20px;">
+            <div style="flex:1; min-width:200px; background:#3498db; color:white; padding:15px; border-radius:5px; text-align:center;">
+                <strong>Total Tickets</strong><br/>
+                <span style="font-size:1.3em;" th:text="${#numbers.formatDecimal(totalRevenueTickets, 0, 'COMMA', 2, 'POINT')} + ' AR'">0 AR</span>
+            </div>
+            <div style="flex:1; min-width:200px; background:#9b59b6; color:white; padding:15px; border-radius:5px; text-align:center;">
+                <strong>Total Publicités</strong><br/>
+                <span style="font-size:1.3em;" th:text="${#numbers.formatDecimal(totalRevenuePublicites, 0, 'COMMA', 2, 'POINT')} + ' AR'">0 AR</span>
+            </div>
+            <div style="flex:1; min-width:200px; background:#e67e22; color:white; padding:15px; border-radius:5px; text-align:center;">
+                <strong>Total Produits Extra</strong><br/>
+                <span style="font-size:1.3em;" th:text="${#numbers.formatDecimal(totalRevenueProduits, 0, 'COMMA', 2, 'POINT')} + ' AR'">0 AR</span>
+            </div>
+            <div style="flex:1; min-width:200px; background:#27ae60; color:white; padding:15px; border-radius:5px; text-align:center;">
+                <strong>Chiffre d'Affaires Total</strong><br/>
+                <span style="font-size:1.5em; font-weight:bold;" th:text="${#numbers.formatDecimal(totalRevenueGlobal, 0, 'COMMA', 2, 'POINT')} + ' AR'">0 AR</span>
+            </div>
+        </div>
+    </div>
+
     <form action="/voyages" method="get" style="border:1px solid #ccc; padding:15px; margin-bottom:20px; background:#f9f9f9;">
         <h3>Filtrer les voyages</h3>
 
@@ -89,6 +112,7 @@
             <th>Heure départ</th>
             <th>Montant genere par tickets vendus</th>
             <th>Montant genere par diffusion publicites</th>
+            <th>Montant genere par produits extra</th>
             <th>Montant payé publicites</th>
             <th>Reste à payer publicites</th>
             <th>Montant Chiffre Affaire Total</th>
@@ -109,6 +133,11 @@
             <td>
                 <span th:if="${placesParCategorie[item.voyage.id] != null}" 
                       th:text="${#numbers.formatDecimal(placesParCategorie[item.voyage.id].revenuePublicites, 0, 'COMMA', 2, 'POINT')} + ' AR'"></span>
+                <span th:if="${placesParCategorie[item.voyage.id] == null}">0 AR</span>
+            </td>
+            <td>
+                <span th:if="${placesParCategorie[item.voyage.id] != null}" 
+                      th:text="${#numbers.formatDecimal(placesParCategorie[item.voyage.id].revenueProduits, 0, 'COMMA', 2, 'POINT')} + ' AR'"></span>
                 <span th:if="${placesParCategorie[item.voyage.id] == null}">0 AR</span>
             </td>
             <td>

@@ -398,3 +398,19 @@ INSERT INTO publicite_diffusion (date_diffusion, id_publicite, nb_diffusion, est
 -- -- ('2026-01-18 10:00:00', 9, 3, FALSE, 3),
 -- -- ('2026-01-19 11:00:00', 9, 2, FALSE, 4);
 
+INSERT INTO produit (libelle, prix_unitaire) VALUES
+('Eau', 5000.00),
+('Boisson gazeuse 330ml', 3000.00),
+('Snack salé', 4000.00),
+('Snack sucré', 4500.00),
+('Café', 2500.00),
+('Thé', 2000.00);
+
+INSERT INTO vente_produit (quantite, date_vente, id_produit, id_voyage, id_client) VALUES
+(150, '2026-01-20 10:00:00', 1, 1, 1);
+--(1, '2026-07-01 10:00:00', 1, 1, 1),
+--(5, '2026-07-01 10:00:00', 3, 1, 1),
+--(8, '2026-07-01 10:00:00', 4, 1, 1),
+--(12, '2026-07-01 10:00:00', 5, 1, 1),
+--(7, '2026-07-01 10:00:00', 6, 1, 1);
+

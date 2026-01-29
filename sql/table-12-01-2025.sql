@@ -386,3 +386,22 @@ CREATE TABLE tarif_publicite (
      montant NUMERIC(15,2) NOT NULL,
      date_tarif TIMESTAMP NOT NULL
 );
+
+
+CREATE TABLE produit (
+   id_produit SERIAL PRIMARY KEY,
+   libelle VARCHAR(20),
+   prix_unitaire INTEGER
+);
+
+CREATE TABLE vente_produit (
+   id_vente_produit SERIAL PRIMARY KEY,
+   id_voyage INTEGER NOT NULL,
+   id_produit INTEGER NOT NULL,
+   id_client INTEGER NOT NULL,
+   quantite INTEGER NOT NULL,
+   date_vente TIMESTAMP NOT NULL,
+   FOREIGN KEY (id_voyage) REFERENCES voyage(id_voyage),
+   FOREIGN KEY (id_client) REFERENCES client(id_client),
+   FOREIGN KEY (id_produit) REFERENCES produit(id_produit)
+);
